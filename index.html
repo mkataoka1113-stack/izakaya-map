@@ -31,6 +31,13 @@
   .open { background:#2e8b6e; color:#fff; }
   .copy { background:#eef1f5; color:#475063; }
   .empty { text-align:center; color:#9aa1ad; font-size:13px; padding:40px 0; }
+  .master {
+    display:block; text-decoration:none; text-align:center;
+    background:#1f2c4d; color:#fff; font-size:14.5px; font-weight:700;
+    padding:14px; border-radius:14px; margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(20,30,60,.15);
+  }
+  .master small { display:block; color:#c9a227; font-weight:400; font-size:11px; margin-top:3px; }
   .toast {
     position:fixed; left:50%; bottom:30px; transform:translateX(-50%);
     background:rgba(28,35,51,.95); color:#fff; font-size:13px;
@@ -44,7 +51,10 @@
   <h1>マイマップ一覧</h1>
   <div class="sub">これまでに作ったお店マップ</div>
 </header>
-<main id="list"></main>
+<main>
+  <a class="master" href="all.html">全店舗マップを開く<small>これまでの全エリア・全店舗を1枚のマップで（地域フィルタ付き）</small></a>
+  <div id="list"></div>
+</main>
 <div class="toast" id="toast"></div>
 <script>
 const MAPS = [
@@ -59,6 +69,17 @@ const MAPS = [
    "押上"
   ],
   "count": 20,
+  "created": "2026-06-10",
+  "updated": "2026-06-10"
+ },
+ {
+  "file": "kitasenju.html",
+  "title": "北千住",
+  "genre": "居酒屋",
+  "areas": [
+   "北千住"
+  ],
+  "count": 10,
   "created": "2026-06-10",
   "updated": "2026-06-10"
  }
@@ -78,20 +99,4 @@ MAPS.slice().reverse().forEach(m => {
     '<div class="meta">' + m.created + ' 作成' + (m.updated && m.updated !== m.created ? '・' + m.updated + ' 更新' : '') + '</div>' +
     '<div class="btns"><a class="open" href="' + m.file + '">マップを開く</a>' +
     '<button class="copy">URLをコピー</button></div>';
-  card.querySelector('.copy').onclick = async () => {
-    try { await navigator.clipboard.writeText(url); }
-    catch(e) {
-      const ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy'); ta.remove();
-    }
-    const t = document.getElementById('toast');
-    t.textContent = 'URLをコピーしました';
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-  };
-  listEl.appendChild(card);
-});
-</script>
-</body>
-</html>
+  car
