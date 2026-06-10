@@ -2,450 +2,96 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>コスパ居酒屋マップ｜上野・浅草・亀戸・錦糸町・押上</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マイマップ一覧</title>
 <style>
-  :root {
-    --bg: #f4f5f7;
-    --card: #ffffff;
-    --ink: #1c2333;
-    --sub: #6b7280;
-    --accent: #c9a227;
-    --good: #2e8b6e;
-    --good-bg: #e4f3ed;
-    --radius: 14px;
-    --shadow: 0 2px 10px rgba(20,30,60,.08);
-  }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; }
   body {
     font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
-    display:flex; flex-direction:column; background:var(--bg); color:var(--ink);
+    background:#f4f5f7; color:#1c2333; min-height:100vh;
   }
-  header {
-    background:linear-gradient(120deg,#141b2e 0%,#1f2c4d 60%,#2b3a63 100%);
-    color:#fff; padding:14px 18px 12px;
+  header { background:linear-gradient(120deg,#141b2e 0%,#1f2c4d 60%,#2b3a63 100%); padding:20px 18px 16px; }
+  header h1 { color:#fff; font-size:18px; font-weight:700; }
+  header .sub { color:#c9a227; font-size:11.5px; margin-top:4px; }
+  main { max-width:560px; margin:0 auto; padding:14px; }
+  .card {
+    background:#fff; border:1px solid #e5e7eb; border-radius:14px;
+    padding:15px 17px; margin-bottom:11px; box-shadow:0 2px 10px rgba(20,30,60,.07);
   }
-  header h1 { font-size:17px; font-weight:700; letter-spacing:.03em; }
-  header h1 .gold { color:var(--accent); }
-  header .note { font-size:10.5px; color:#9aa3b8; margin-top:3px; }
-  .chips { display:flex; gap:7px; margin-top:10px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
-  .chips::-webkit-scrollbar { display:none; }
-  .chip {
-    border:none; cursor:pointer; font-size:12.5px; font-weight:600; white-space:nowrap;
-    padding:6px 13px; border-radius:999px; color:#fff;
-    background:rgba(255,255,255,.12); transition:all .15s;
-    display:flex; align-items:center; gap:6px; flex:none;
+  .chips { display:flex; gap:6px; margin-bottom:8px; }
+  .chip { font-size:11px; padding:2px 10px; border-radius:999px; background:#fdf6e3; color:#854f0b; }
+  .chip.count { background:#eef1f5; color:#6b7280; }
+  .card h2 { font-size:15.5px; font-weight:700; }
+  .meta { font-size:11.5px; color:#9aa1ad; margin-top:4px; }
+  .btns { display:flex; gap:8px; margin-top:11px; }
+  .btns a, .btns button {
+    font-size:12.5px; font-weight:700; text-decoration:none; border:none; cursor:pointer;
+    padding:8px 16px; border-radius:9px;
   }
-  .chip .dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
-  .chip:hover { background:rgba(255,255,255,.22); }
-  .chip.active { background:#fff; color:var(--ink); }
-  .container { flex:1; display:flex; min-height:0; position:relative; }
-  #map { flex:1; min-width:0; }
-  aside { width:380px; overflow-y:auto; padding:14px; background:var(--bg); }
-  .area-label {
-    font-size:12px; font-weight:700; color:var(--sub);
-    letter-spacing:.12em; margin:14px 4px 8px;
-    display:flex; align-items:center; gap:7px;
-  }
-  .area-label .dot { width:10px; height:10px; border-radius:50%; }
-  .shop {
-    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
-    padding:14px 16px; margin-bottom:10px; cursor:pointer;
-    border:1.5px solid transparent; transition:border-color .15s, box-shadow .15s;
-    position:relative;
-  }
-  .shop:hover { box-shadow:0 4px 16px rgba(20,30,60,.14); }
-  .shop.selected { border-color:var(--accent); }
-  .shop .top { display:flex; align-items:center; gap:10px; padding-right:40px; }
-  .shop .num {
-    flex:none; width:26px; height:26px; border-radius:50%; color:#fff;
-    font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;
-  }
-  .shop h3 { font-size:14.5px; font-weight:700; }
-  .shop .addr { font-size:11.5px; color:var(--sub); margin:6px 0 8px; }
-  .tag-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px; }
-  .tag { font-size:11.5px; padding:3px 9px; border-radius:7px; line-height:1.5; }
-  .tag.food { background:#fdf6e3; color:#8a6d1c; }
-  .tag.drink { background:#eef4fb; color:#2a5d96; }
-  .shop .links { display:flex; gap:8px; }
-  .shop .links a {
-    font-size:12px; font-weight:600; text-decoration:none;
-    color:#2a5d96; background:#f1f4f8; padding:6px 12px; border-radius:8px;
-  }
-  .shop .links a:active, .shop .links a:hover { background:#e2e9f2; }
-  /* want (thumbs-up) button */
-  .want {
-    position:absolute; top:12px; right:12px; border:none; cursor:pointer;
-    width:34px; height:34px; border-radius:50%; line-height:1;
-    background:#f1f2f5; color:#b6bcc8; transition:all .15s;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .want.on { background:var(--good-bg); color:var(--good); transform:scale(1.08); }
-  /* selection bar */
-  #selbar {
-    position:fixed; left:50%; transform:translateX(-50%) translateY(120%);
-    bottom:16px; z-index:1100;
-    background:#1c2333; color:#fff; border-radius:999px;
-    box-shadow:0 6px 24px rgba(0,0,0,.3);
-    display:flex; align-items:center; gap:4px; padding:8px 10px 8px 18px;
-    transition:transform .25s ease; max-width:94vw;
-  }
-  #selbar.show { transform:translateX(-50%) translateY(0); }
-  #selbar .cnt { font-size:13px; font-weight:600; white-space:nowrap; }
-  #selbar .cnt b { color:#8fd9bd; }
-  #selbar button {
-    border:none; cursor:pointer; font-size:12.5px; font-weight:700;
-    padding:8px 14px; border-radius:999px; margin-left:6px; white-space:nowrap;
-  }
-  #selbar .send { background:var(--good); color:#fff; }
-  #selbar .copy { background:rgba(255,255,255,.15); color:#fff; }
-  /* mobile tabs */
-  #tabs { display:none; }
-  /* map markers */
-  .pin {
-    width:30px; height:30px; border-radius:50% 50% 50% 0;
-    transform:rotate(-45deg); border:2.5px solid #fff;
-    box-shadow:0 2px 6px rgba(0,0,0,.35);
-    display:flex; align-items:center; justify-content:center;
-  }
-  .pin span { transform:rotate(45deg); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
-  .pin.wanted { border-color:#bfe8d8; }
-  .leaflet-popup-content-wrapper { border-radius:12px; box-shadow:0 4px 18px rgba(20,30,60,.25); }
-  .leaflet-popup-content { font-size:12.5px; line-height:1.6; margin:14px 16px; }
-  .leaflet-popup-content h3 { font-size:14.5px; margin-bottom:4px; color:var(--ink); padding-right:30px; }
-  .leaflet-popup-content .p-addr { color:var(--sub); font-size:11.5px; margin-bottom:6px; }
-  .leaflet-popup-content a { color:#2a5d96; font-weight:600; text-decoration:none; margin-right:12px; }
-  .leaflet-popup-content .p-want {
-    border:none; cursor:pointer; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700;
-    background:#f1f2f5; color:#6b7280; margin-top:6px;
-    display:inline-flex; align-items:center; gap:5px;
-  }
-  .leaflet-popup-content .p-want.on { background:var(--good-bg); color:var(--good); }
-  .label-mini { font-weight:700; margin-right:2px; }
-  .icon { vertical-align:-2px; }
+  .open { background:#2e8b6e; color:#fff; }
+  .copy { background:#eef1f5; color:#475063; }
+  .empty { text-align:center; color:#9aa1ad; font-size:13px; padding:40px 0; }
   .toast {
-    position:fixed; left:50%; bottom:84px; transform:translateX(-50%);
+    position:fixed; left:50%; bottom:30px; transform:translateX(-50%);
     background:rgba(28,35,51,.95); color:#fff; font-size:13px;
-    padding:10px 18px; border-radius:10px; z-index:1200; opacity:0;
-    transition:opacity .3s; pointer-events:none; white-space:nowrap;
+    padding:10px 18px; border-radius:10px; opacity:0; transition:opacity .3s; pointer-events:none;
   }
   .toast.show { opacity:1; }
-  @media (max-width: 800px) {
-    header h1 { font-size:16px; }
-    .container { flex-direction:column; }
-    #map { height:100%; }
-    aside {
-      display:none; width:100%; height:100%;
-      padding:12px 12px 90px;
-    }
-    body.list-mode #map { display:none; }
-    body.list-mode aside { display:block; }
-    #tabs {
-      display:flex; position:fixed; left:50%; transform:translateX(-50%);
-      bottom:16px; z-index:1000; background:#fff; border-radius:999px;
-      box-shadow:0 4px 18px rgba(0,0,0,.22); overflow:hidden;
-    }
-    body.has-sel #tabs { bottom:76px; }
-    #tabs button {
-      border:none; cursor:pointer; font-size:13.5px; font-weight:700;
-      padding:11px 26px; background:#fff; color:var(--sub);
-    }
-    #tabs button.active { background:var(--ink); color:#fff; }
-    #selbar { bottom:14px; }
-  }
 </style>
 </head>
 <body>
 <header>
-  <h1>下町<span class="gold">コスパ居酒屋</span>マップ</h1>
-  <div class="note">上野・浅草・亀戸・錦糸町・押上｜グッドボタンで行きたいお店を選んで送れます｜ピン位置は近似・最新情報はリンク先で（2026年6月作成）</div>
-  <div class="chips" id="chips"></div>
+  <h1>マイマップ一覧</h1>
+  <div class="sub">これまでに作ったお店マップ</div>
 </header>
-<div class="container">
-  <div id="map"></div>
-  <aside id="list"></aside>
-</div>
-<div id="tabs">
-  <button id="tabMap" class="active">マップ</button>
-  <button id="tabList">リスト</button>
-</div>
-<div id="selbar">
-  <span class="cnt"><b><span id="selThumb"></span> <span id="selCount">0</span>件</b> 選択中</span>
-  <button class="send" id="btnShare">送る</button>
-  <button class="copy" id="btnCopy">コピー</button>
-</div>
+<main id="list"></main>
 <div class="toast" id="toast"></div>
 <script>
-const AREAS = [
-  { name: "上野", color: "#e05d4f", shops: [
-    { n:"もつ焼 大統領 本店", a:"台東区上野6-10-14", lat:35.7104, lng:139.7745,
-      m:"もつ焼き1本90円〜・馬モツ煮込み（昭和25年創業）", d:"名物チューハイ・ホッピー",
-      u:"https://tabelog.com/tokyo/A1311/A131101/13016740/" },
-    { n:"立飲み たきおか", a:"台東区上野6-9-14", lat:35.7111, lng:139.7749,
-      m:"朝から飲める立ち飲みの聖地・つまみ200円前後", d:"チューハイ・ホッピー",
-      u:"https://www.google.com/maps/search/立飲みたきおか+上野" },
-    { n:"肉の大山 上野店", a:"台東区上野6-13-2", lat:35.7117, lng:139.7757,
-      m:"精肉店直営・やみつきメンチ・特製コロッケ", d:"生ビール・サワー類",
-      u:"https://www.google.com/maps/search/肉の大山+上野店" },
-    { n:"大衆酒場 カドクラ", a:"台東区上野6-13-1 フォーラム味ビル1F", lat:35.7119, lng:139.7753,
-      m:"ハムカツ・桜肉（馬肉）料理", d:"バイスサワー",
-      u:"https://www.google.com/maps/search/大衆酒場カドクラ+上野" },
-    { n:"魚草", a:"台東区上野6-10-7 アメ横プラザ内", lat:35.7102, lng:139.7742,
-      m:"アメ横の海鮮立ち飲み・新鮮な刺身と貝焼き", d:"日本酒の品揃えが豊富",
-      u:"https://www.google.com/maps/search/魚草+アメ横" },
-  ]},
-  { name: "浅草", color: "#5b9a4a", shops: [
-    { n:"神谷バー", a:"台東区浅草1-1-1", lat:35.7110, lng:139.7963,
-      m:"明治13年創業・日本最古のバー（洋食つまみも）", d:"名物「デンキブラン」",
-      u:"https://tabelog.com/tokyo/A1311/A131102/13003664/" },
-    { n:"正ちゃん", a:"台東区浅草2-7-13（ホッピー通り）", lat:35.7146, lng:139.7934,
-      m:"トロトロの牛煮込み550円", d:"ホッピー",
-      u:"https://tabelog.com/tokyo/A1311/A131102/13010507/" },
-    { n:"鈴芳", a:"台東区浅草2丁目（ホッピー通り）", lat:35.7144, lng:139.7930,
-      m:"煮込みと串が定番のホッピー通り名物店", d:"希少な樽生ホッピー（600円）",
-      u:"https://tabelog.com/tokyo/A1311/A131102/13016820/" },
-    { n:"居酒屋 浩司", a:"台東区浅草2丁目（ホッピー通り）", lat:35.7141, lng:139.7932,
-      m:"店頭の大鍋でグツグツ煮込む牛すじ煮込み", d:"ホッピー・チューハイ",
-      u:"https://www.google.com/maps/search/居酒屋浩司+浅草" },
-    { n:"浅草 もつ焼のんき", a:"台東区雷門2-18-15 丸屋ビル1F", lat:35.71036, lng:139.79675,
-      m:"秘伝だれの名物「しろたれ」（浅草駅徒歩1分）", d:"元祖焼酎ハイボール「のんきボール」",
-      u:"https://b953614.gorp.jp/" },
-  ]},
-  { name: "亀戸・錦糸町", color: "#3a7bc8", shops: [
-    { n:"亀戸ホルモン 本店", a:"江東区亀戸5-4-9 第2ドミール1F", lat:35.6977, lng:139.8272,
-      m:"毎朝仕入れの新鮮ホルモン・「トロミノ」必食（行列必至）", d:"レモンサワー・ホッピー",
-      u:"https://tabelog.com/tokyo/A1312/A131202/13008099/" },
-    { n:"ホルモン青木 亀戸本店", a:"江東区亀戸5-13-1", lat:35.6984, lng:139.8284,
-      m:"鮮度抜群・大ぶりポーションのホルモン焼き", d:"瓶ビール・サワー",
-      u:"https://tabelog.com/tokyo/A1312/A131202/13059962/" },
-    { n:"亀戸餃子 本店", a:"江東区亀戸5-3-3", lat:35.6976, lng:139.8266,
-      m:"メニューは餃子のみ（1皿約300円・2皿目自動提供）", d:"餃子＋ビールの黄金コンビ",
-      u:"https://www.google.com/maps/search/亀戸餃子+本店" },
-    { n:"三四郎", a:"墨田区江東橋3-5-4（錦糸町）", lat:35.6947, lng:139.8147,
-      m:"白木カウンターの老舗酒場・焼きとん・名物「くりから焼き」", d:"酎ハイ・日本酒",
-      u:"https://tabelog.com/tokyo/A1312/A131201/13029759/" },
-    { n:"美味千成", a:"墨田区江東橋（錦糸町駅前）", lat:35.6962, lng:139.8137,
-      m:"昭和創業の駅前大衆酒場・焼きとん・煮込み", d:"19時までホッピーセット300円",
-      u:"https://1000bero.net/restaurant-2201/" },
-  ]},
-  { name: "押上", color: "#9163c2", shops: [
-    { n:"もつ焼き 稲垣 押上店", a:"墨田区業平2-17-8", lat:35.7082, lng:139.8108,
-      m:"炭火もつ焼き・味しみのもつ煮（押上駅すぐ）", d:"チューハイ・ホッピー",
-      u:"https://tabelog.com/tokyo/A1312/A131203/13046230/" },
-    { n:"やきとり伝次", a:"墨田区業平（スカイツリー駅徒歩2分）", lat:35.7100, lng:139.8090,
-      m:"串120円〜・肉刺し盛り・特製もつ煮込み（土日は昼飲みも）", d:"生ビール・サワー",
-      u:"https://tabelog.com/tokyo/A1312/A131203/13221731/" },
-    { n:"角吉 とうきょうスカイツリー駅前店", a:"墨田区押上2-1-18", lat:35.71064, lng:139.80866,
-      m:"備長炭の大串もつ焼き（シロが名物）・串1本120円〜", d:"ホッピー・チューハイ",
-      u:"https://kadokichi-skytree.gorp.jp/" },
-    { n:"業平 仁", a:"墨田区業平3-2-1", lat:35.7078, lng:139.8122,
-      m:"スカイツリーのお膝元・女将の手料理が評判の隠れ家", d:"日本酒・焼酎の品揃えが豊富",
-      u:"https://tabelog.com/tokyo/A1312/A131203/13200001/" },
-    { n:"わくい亭", a:"墨田区本所3-22-12（押上から徒歩圏）", lat:35.7055, lng:139.7998,
-      m:"肉汁あふれるジャンボメンチカツ・タンシチュー（売り切れ御免）", d:"瓶ビール・日本酒",
-      u:"https://r.gnavi.co.jp/hf231gue0000/" },
-  ]},
+const MAPS = [
+ {
+  "file": "ueno-asakusa-kameido-kinshicho-oshiage.html",
+  "title": "上野・浅草・亀戸 錦糸町・押上",
+  "genre": "居酒屋",
+  "areas": [
+   "上野",
+   "浅草",
+   "亀戸・錦糸町",
+   "押上"
+  ],
+  "count": 20,
+  "created": "2026-06-10",
+  "updated": "2026-06-10"
+ }
 ];
-
-const map = L.map('map', { zoomControl:false }).setView([35.704, 139.795], 13);
-L.control.zoom({ position:'bottomright' }).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  maxZoom: 20, subdomains: 'abcd',
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-}).addTo(map);
-
-const gmapUrl = s => 'https://www.google.com/maps/search/' + encodeURIComponent(s.n + ' ' + s.a);
-const shopId = s => s.n;
-
-// SVGアイコン（lucide風・currentColorで親要素の色を継承）
-const svgIcon = (paths, size) =>
-  '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="' + size + '" height="' + size + '">' +
-  paths + '</svg>';
-const I_THUMB = sz => svgIcon('<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>', sz);
-const I_PIN = sz => svgIcon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>', sz);
-document.getElementById('selThumb').innerHTML = I_THUMB(14);
-
-// 行きたいリスト（端末に保存）
-let wants = [];
-try { wants = JSON.parse(localStorage.getItem('izakaya_wants') || '[]'); } catch(e) {}
-const saveWants = () => { try { localStorage.setItem('izakaya_wants', JSON.stringify(wants)); } catch(e) {} };
-const isWanted = s => wants.includes(shopId(s));
-
 const listEl = document.getElementById('list');
-const chipsEl = document.getElementById('chips');
-const layerGroups = {}, sections = {};
-const allShops = [];
-let activeArea = null;
-
-AREAS.forEach(area => {
-  const group = L.layerGroup().addTo(map);
-  layerGroups[area.name] = group;
-
-  const chip = document.createElement('button');
-  chip.className = 'chip';
-  chip.dataset.area = area.name;
-  chip.innerHTML = '<span class="dot" style="background:' + area.color + '"></span>' + area.name;
-  chip.onclick = () => toggleArea(area.name);
-  chipsEl.appendChild(chip);
-
-  const section = document.createElement('div');
-  sections[area.name] = section;
-  const label = document.createElement('div');
-  label.className = 'area-label';
-  label.innerHTML = '<span class="dot" style="background:' + area.color + '"></span>' + area.name;
-  section.appendChild(label);
-
-  area.shops.forEach((s, i) => {
-    s.area = area.name; s.color = area.color; s.idx = i + 1;
-    allShops.push(s);
-
-    const icon = wanted => L.divIcon({
-      className: '',
-      html: '<div class="pin' + (wanted ? ' wanted' : '') + '" style="background:' + area.color + '">' +
-            '<span>' + (wanted ? I_THUMB(13) : s.idx) + '</span></div>',
-      iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]
-    });
-    const marker = L.marker([s.lat, s.lng], { icon: icon(isWanted(s)) });
-    s._marker = marker; s._icon = icon;
-    marker.addTo(group);
-
-    marker.bindPopup(() =>
-      '<h3>' + s.n + '</h3>' +
-      '<div class="p-addr">' + I_PIN(11) + ' ' + s.a + '</div>' +
-      '<div><span class="label-mini">名物</span>' + s.m + '</div>' +
-      '<div><span class="label-mini">お酒</span>' + s.d + '</div>' +
-      '<div style="margin-top:6px"><a href="' + s.u + '" target="_blank">店舗情報</a>' +
-      '<a href="' + gmapUrl(s) + '" target="_blank">Googleマップ</a></div>' +
-      '<button class="p-want' + (isWanted(s) ? ' on' : '') + '" onclick="toggleWant(\'' +
-      shopId(s).replace(/'/g, "\\'") + '\')">' + I_THUMB(14) + (isWanted(s) ? ' 行きたい！' : ' 行きたい') + '</button>'
-    );
-
-    const card = document.createElement('div');
-    card.className = 'shop';
-    s._card = card;
-    card.innerHTML =
-      '<div class="top"><span class="num" style="background:' + area.color + '">' + s.idx + '</span>' +
-      '<h3>' + s.n + '</h3></div>' +
-      '<button class="want' + (isWanted(s) ? ' on' : '') + '" title="行きたい">' + I_THUMB(17) + '</button>' +
-      '<div class="addr">' + I_PIN(11) + ' ' + s.a + '</div>' +
-      '<div class="tag-row"><span class="tag food"><span class="label-mini">名物</span>' + s.m + '</span>' +
-      '<span class="tag drink"><span class="label-mini">お酒</span>' + s.d + '</span></div>' +
-      '<div class="links"><a href="' + s.u + '" target="_blank">店舗情報</a>' +
-      '<a href="' + gmapUrl(s) + '" target="_blank">Googleマップ</a></div>';
-    card.querySelector('.want').addEventListener('click', e => {
-      e.stopPropagation();
-      toggleWant(shopId(s));
-    });
-    card.addEventListener('click', e => {
-      if (e.target.tagName === 'A') return;
-      document.querySelectorAll('.shop.selected').forEach(el => el.classList.remove('selected'));
-      card.classList.add('selected');
-      if (document.body.classList.contains('list-mode') && window.innerWidth <= 800) showTab('map');
-      map.flyTo([s.lat, s.lng], 17, { duration:.6 });
-      setTimeout(() => marker.openPopup(), 650);
-    });
-    section.appendChild(card);
-  });
-  listEl.appendChild(section);
+if (!MAPS.length) {
+  listEl.innerHTML = '<div class="empty">まだマップがありません</div>';
+}
+MAPS.slice().reverse().forEach(m => {
+  const url = new URL(m.file, location.href).href;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML =
+    '<div class="chips"><span class="chip">' + m.genre + '</span>' +
+    '<span class="chip count">' + m.count + '店</span></div>' +
+    '<h2>' + m.title + '</h2>' +
+    '<div class="meta">' + m.created + ' 作成' + (m.updated && m.updated !== m.created ? '・' + m.updated + ' 更新' : '') + '</div>' +
+    '<div class="btns"><a class="open" href="' + m.file + '">マップを開く</a>' +
+    '<button class="copy">URLをコピー</button></div>';
+  card.querySelector('.copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(url); }
+    catch(e) {
+      const ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    const t = document.getElementById('toast');
+    t.textContent = 'URLをコピーしました';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  };
+  listEl.appendChild(card);
 });
-
-function toggleWant(id) {
-  const s = allShops.find(x => shopId(x) === id);
-  if (!s) return;
-  const pos = wants.indexOf(id);
-  if (pos >= 0) wants.splice(pos, 1); else wants.push(id);
-  saveWants();
-  const on = isWanted(s);
-  s._card.querySelector('.want').classList.toggle('on', on);
-  s._marker.setIcon(s._icon(on));
-  if (s._marker.isPopupOpen()) { s._marker.closePopup(); s._marker.openPopup(); }
-  updateSelbar();
-}
-window.toggleWant = toggleWant;
-
-const selbar = document.getElementById('selbar');
-function updateSelbar() {
-  document.getElementById('selCount').textContent = wants.length;
-  selbar.classList.toggle('show', wants.length > 0);
-  document.body.classList.toggle('has-sel', wants.length > 0);
-}
-
-function buildShareText() {
-  const lines = ['【行きたいお店ピックアップ】'];
-  AREAS.forEach(area => {
-    area.shops.filter(isWanted).forEach(s => {
-      lines.push('👍 ' + s.n + '（' + area.name + '）');
-      lines.push('　' + s.a);
-      lines.push('　' + gmapUrl(s));
-    });
-  });
-  if (location.protocol.startsWith('http')) lines.push('', 'マップ：' + location.href);
-  return lines.join('\n');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-document.getElementById('btnShare').onclick = async () => {
-  const text = buildShareText();
-  if (navigator.share) {
-    try { await navigator.share({ text }); } catch(e) {}
-  } else {
-    await copyText(text);
-    showToast('コピーしました（LINE等に貼り付けてください）');
-  }
-};
-document.getElementById('btnCopy').onclick = async () => {
-  await copyText(buildShareText());
-  showToast('コピーしました');
-};
-async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); }
-  catch(e) {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy'); ta.remove();
-  }
-}
-
-function toggleArea(name) {
-  activeArea = (activeArea === name) ? null : name;
-  AREAS.forEach(area => {
-    const show = !activeArea || area.name === activeArea;
-    sections[area.name].style.display = show ? '' : 'none';
-    if (show) layerGroups[area.name].addTo(map);
-    else map.removeLayer(layerGroups[area.name]);
-  });
-  document.querySelectorAll('.chip').forEach(c =>
-    c.classList.toggle('active', c.dataset.area === activeArea));
-  const pts = [];
-  AREAS.forEach(a => {
-    if (!activeArea || a.name === activeArea) a.shops.forEach(s => pts.push([s.lat, s.lng]));
-  });
-  map.flyToBounds(pts, { padding:[40,40], duration:.6 });
-}
-
-// mobile tabs
-const tabMap = document.getElementById('tabMap');
-const tabList = document.getElementById('tabList');
-function showTab(which) {
-  document.body.classList.toggle('list-mode', which === 'list');
-  tabMap.classList.toggle('active', which === 'map');
-  tabList.classList.toggle('active', which === 'list');
-  if (which === 'map') setTimeout(() => map.invalidateSize(), 50);
-}
-tabMap.onclick = () => showTab('map');
-tabList.onclick = () => showTab('list');
-
-updateSelbar();
 </script>
 </body>
 </html>
