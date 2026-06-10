@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>コスパ居酒屋マップ｜北千住</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --ink: #1c2333;
+    --sub: #6b7280;
+    --accent: #c9a227;
+    --good: #2e8b6e;
+    --good-bg: #e4f3ed;
+    --radius: 14px;
+    --shadow: 0 2px 10px rgba(20,30,60,.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; }
+  body {
+    font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+    display:flex; flex-direction:column; background:var(--bg); color:var(--ink);
+  }
+  header {
+    background:linear-gradient(120deg,#141b2e 0%,#1f2c4d 60%,#2b3a63 100%);
+    color:#fff; padding:14px 18px 12px;
+  }
+  header h1 { font-size:17px; font-weight:700; letter-spacing:.03em; }
+  header h1 .gold { color:var(--accent); }
+  header .note { font-size:10.5px; color:#9aa3b8; margin-top:3px; }
+  .chips { display:flex; gap:7px; margin-top:10px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
+  .chips::-webkit-scrollbar { display:none; }
+  .chip {
+    border:none; cursor:pointer; font-size:12.5px; font-weight:600; white-space:nowrap;
+    padding:6px 13px; border-radius:999px; color:#fff;
+    background:rgba(255,255,255,.12); transition:all .15s;
+    display:flex; align-items:center; gap:6px; flex:none;
+  }
+  .chip .dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .chip:hover { background:rgba(255,255,255,.22); }
+  .chip.active { background:#fff; color:var(--ink); }
+  .container { flex:1; display:flex; min-height:0; position:relative; }
+  #map { flex:1; min-width:0; }
+  aside { width:380px; overflow-y:auto; padding:14px; background:var(--bg); }
+  .area-label {
+    font-size:12px; font-weight:700; color:var(--sub);
+    letter-spacing:.12em; margin:14px 4px 8px;
+    display:flex; align-items:center; gap:7px;
+  }
+  .area-label .dot { width:10px; height:10px; border-radius:50%; }
+  .shop {
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:14px 16px; margin-bottom:10px; cursor:pointer;
+    border:1.5px solid transparent; transition:border-color .15s, box-shadow .15s;
+    position:relative;
+  }
+  .shop:hover { box-shadow:0 4px 16px rgba(20,30,60,.14); }
+  .shop.selected { border-color:var(--accent); }
+  .shop .top { display:flex; align-items:center; gap:10px; padding-right:40px; }
+  .shop .num {
+    flex:none; width:26px; height:26px; border-radius:50%; color:#fff;
+    font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  .shop h3 { font-size:14.5px; font-weight:700; }
+  .shop .addr { font-size:11.5px; color:var(--sub); margin:6px 0 8px; }
+  .tag-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px; }
+  .tag { font-size:11.5px; padding:3px 9px; border-radius:7px; line-height:1.5; }
+  .tag.food { background:#fdf6e3; color:#8a6d1c; }
+  .tag.drink { background:#eef4fb; color:#2a5d96; }
+  .shop .links { display:flex; gap:8px; }
+  .shop .links a {
+    font-size:12px; font-weight:600; text-decoration:none;
+    color:#2a5d96; background:#f1f4f8; padding:6px 12px; border-radius:8px;
+  }
+  .shop .links a:active, .shop .links a:hover { background:#e2e9f2; }
+  /* want (thumbs-up) button */
+  .want {
+    position:absolute; top:12px; right:12px; border:none; cursor:pointer;
+    width:34px; height:34px; border-radius:50%; line-height:1;
+    background:#f1f2f5; color:#b6bcc8; transition:all .15s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .want.on { background:var(--good-bg); color:var(--good); transform:scale(1.08); }
+  /* selection bar */
+  #selbar {
+    position:fixed; left:50%; transform:translateX(-50%) translateY(120%);
+    bottom:16px; z-index:1100;
+    background:#1c2333; color:#fff; border-radius:999px;
+    box-shadow:0 6px 24px rgba(0,0,0,.3);
+    display:flex; align-items:center; gap:4px; padding:8px 10px 8px 18px;
+    transition:transform .25s ease; max-width:94vw;
+  }
+  #selbar.show { transform:translateX(-50%) translateY(0); }
+  #selbar .cnt { font-size:13px; font-weight:600; white-space:nowrap; }
+  #selbar .cnt b { color:#8fd9bd; }
+  #selbar button {
+    border:none; cursor:pointer; font-size:12.5px; font-weight:700;
+    padding:8px 14px; border-radius:999px; margin-left:6px; white-space:nowrap;
+  }
+  #selbar .send { background:var(--good); color:#fff; }
+  #selbar .copy { background:rgba(255,255,255,.15); color:#fff; }
+  /* mobile tabs */
+  #tabs { display:none; }
+  /* map markers */
+  .pin {
+    width:30px; height:30px; border-radius:50% 50% 50% 0;
+    transform:rotate(-45deg); border:2.5px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.35);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pin span { transform:rotate(45deg); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .pin.wanted { border-color:#bfe8d8; }
+  .leaflet-popup-content-wrapper { border-radius:12px; box-shadow:0 4px 18px rgba(20,30,60,.25); }
+  .leaflet-popup-content { font-size:12.5px; line-height:1.6; margin:14px 16px; }
+  .leaflet-popup-content h3 { font-size:14.5px; margin-bottom:4px; color:var(--ink); padding-right:30px; }
+  .leaflet-popup-content .p-addr { color:var(--sub); font-size:11.5px; margin-bottom:6px; }
+  .leaflet-popup-content a { color:#2a5d96; font-weight:600; text-decoration:none; margin-right:12px; }
+  .leaflet-popup-content .p-want {
+    border:none; cursor:pointer; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700;
+    background:#f1f2f5; color:#6b7280; margin-top:6px;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .leaflet-popup-content .p-want.on { background:var(--good-bg); color:var(--good); }
+  .label-mini { font-weight:700; margin-right:2px; }
+  .icon { vertical-align:-2px; }
+  .toast {
+    position:fixed; left:50%; bottom:84px; transform:translateX(-50%);
+    background:rgba(28,35,51,.95); color:#fff; font-size:13px;
+    padding:10px 18px; border-radius:10px; z-index:1200; opacity:0;
+    transition:opacity .3s; pointer-events:none; white-space:nowrap;
+  }
+  .toast.show { opacity:1; }
+  @media (max-width: 800px) {
+    header h1 { font-size:16px; }
+    .container { flex-direction:column; }
+    #map { height:100%; }
+    aside {
+      display:none; width:100%; height:100%;
+      padding:12px 12px 90px;
+    }
+    body.list-mode #map { display:none; }
+    body.list-mode aside { display:block; }
+    #tabs {
+      display:flex; position:fixed; left:50%; transform:translateX(-50%);
+      bottom:16px; z-index:1000; background:#fff; border-radius:999px;
+      box-shadow:0 4px 18px rgba(0,0,0,.22); overflow:hidden;
+    }
+    body.has-sel #tabs { bottom:76px; }
+    #tabs button {
+      border:none; cursor:pointer; font-size:13.5px; font-weight:700;
+      padding:11px 26px; background:#fff; color:var(--sub);
+    }
+    #tabs button.active { background:var(--ink); color:#fff; }
+    #selbar { bottom:14px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>北千住<span class="gold">コスパ居酒屋</span>マップ</h1>
+  <div class="note">北千住｜グッドボタンで行きたいお店を選んで送れます｜ピン位置は近似・最新情報はリンク先で（2026年6月作成）</div>
+  <div class="chips" id="chips"></div>
+</header>
+<div class="container">
+  <div id="map"></div>
+  <aside id="list"></aside>
+</div>
+<div id="tabs">
+  <button id="tabMap" class="active">マップ</button>
+  <button id="tabList">リスト</button>
+</div>
+<div id="selbar">
+  <span class="cnt"><b><span id="selThumb"></span> <span id="selCount">0</span>件</b> 選択中</span>
+  <button class="send" id="btnShare">送る</button>
+  <button class="copy" id="btnCopy">コピー</button>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const AREAS = [
+ {
+  "name": "北千住",
+  "color": "#e05d4f",
+  "shops": [
+   {
+    "n": "加賀屋 北千住店",
+    "a": "足立区千住2-62",
+    "lat": 35.749,
+    "lng": 139.8012,
+    "m": "創業40年超・大串もつ焼き・白みそもつ煮込み（駅徒歩1分）",
+    "d": "ホッピー・生ビール",
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13023004/"
+   },
+   {
+    "n": "大衆酒蔵 幸楽",
+    "a": "足立区千住2丁目（北千住駅前）",
+    "lat": 35.7488,
+    "lng": 139.801,
+    "m": "1968年創業の老舗・名物「幸楽ボール」・穴子天ぷら",
+    "d": "幸楽ボール・チューハイ",
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13025702/"
+   },
+   {
+    "n": "天七 本店",
+    "a": "足立区千住2丁目（北千住駅徒歩1分）",
+    "lat": 35.7493,
+    "lng": 139.8015,
+    "m": "北千住名物の串揚げ老舗・1本100円台・昼飲みOK",
+    "d": "瓶ビール・ハイボール",
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13008732/"
+   },
+   {
+    "n": "ざわさん",
+    "a": "足立区千住1-33-12 フルカワビル1F",
+    "lat": 35.7497,
+    "lng": 139.8,
+    "m": "割烹系立ち飲み・日替わり刺身・上質な一品料理（禁煙）",
+    "d": "日本酒・レモンサワー",
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13182860/"
+   },
+   {
+    "n": "藤や",
+    "a": "足立区千住2-35",
+    "lat": 35.7483,
+    "lng": 139.8006,
+    "m": "40年以上注ぎ足し八丁味噌スープの串煮込み・串120円",
+    "d": "日本酒・チューハイ",
+    "u": "https://san-tatsu.jp/spots/39236/"
+   },
+   {
+    "n": "もつ焼き やまぴー",
+    "a": "足立区千住旭町22-4",
+    "lat": 35.7503,
+    "lng": 139.8033,
+    "m": "加賀屋修業・串が折れそうな大ポーション・レバーやスタミナ串",
+    "d": "生ビール・レモンサワー",
+    "u": "https://san-tatsu.jp/spots/155430/"
+   },
+   {
+    "n": "酒呑倶楽部アタル",
+    "a": "足立区千住1-32-6 1F",
+    "lat": 35.7498,
+    "lng": 139.8002,
+    "m": "名物蒸しつくね5種・飲み横ガラス張りの人気店",
+    "d": "菊姫など名酒の日本酒・サワー",
+    "u": "https://san-tatsu.jp/spots/155424/"
+   },
+   {
+    "n": "ささや 北千住",
+    "a": "足立区千住2-65",
+    "lat": 35.7487,
+    "lng": 139.8017,
+    "m": "信州味噌の串煮込み・煮込んで炭火で焼く串焼き・駅すぐ",
+    "d": "日本酒・サワー",
+    "u": "https://san-tatsu.jp/spots/39249/"
+   },
+   {
+    "n": "びあマ",
+    "a": "足立区千住2-62 吉岡ビル1F",
+    "lat": 35.7489,
+    "lng": 139.8016,
+    "m": "1000種40カ国以上クラフトビール・角打ちスタイル",
+    "d": "世界のクラフトビール",
+    "u": "https://san-tatsu.jp/spots/155434/"
+   },
+   {
+    "n": "もつ焼き まんまる",
+    "a": "足立区千住3-58",
+    "lat": 35.7474,
+    "lng": 139.8015,
+    "m": "コスパ最高・串1本120円〜・もつ煮込みも絶品（西口徒歩5分）",
+    "d": "ホッピー・チューハイ",
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13131156/"
+   }
+  ]
+ }
+];
+
+const map = L.map('map', { zoomControl:false });
+L.control.zoom({ position:'bottomright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  maxZoom: 20, subdomains: 'abcd',
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+}).addTo(map);
+
+const gmapUrl = s => 'https://www.google.com/maps/search/' + encodeURIComponent(s.n + ' ' + s.a);
+const shopId = s => s.n;
+
+// SVGアイコン（lucide風・currentColorで親要素の色を継承）
+const svgIcon = (paths, size) =>
+  '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="' + size + '" height="' + size + '">' +
+  paths + '</svg>';
+const I_THUMB = sz => svgIcon('<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>', sz);
+const I_PIN = sz => svgIcon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>', sz);
+document.getElementById('selThumb').innerHTML = I_THUMB(14);
+
+// 行きたいリスト（端末に保存）
+let wants = [];
+try { wants = JSON.parse(localStorage.getItem('izakaya_wants') || '[]'); } catch(e) {}
+const saveWants = () => { try { localStorage.setItem('izakaya_wants', JSON.stringify(wants)); } catch(e) {} };
+const isWanted = s => wants.includes(shopId(s));
+
+const listEl = document.getElementById('list');
+const chipsEl = document.getElementById('chips');
+const layerGroups = {}, sections = {};
+const allShops = [];
+let activeArea = null;
+
+AREAS.forEach(area => {
+  const group = L.layerGroup().addTo(map);
+  layerGroups[area.name] = group;
+
+  const chip = document.createElement('button');
+  chip.className = 'chip';
+  chip.dataset.area = area.name;
+  chip.innerHTML = '<span class="dot" style="background:' + area.color + '"></span>' + area.name;
+  chip.onclick = () => toggleArea(area.name);
+  chipsEl.appendChild(chip);
+
+  const section = document.createElement('div');
+  sections[area.name] = section;
+  const label = document.createElement('div');
+  label.className = 'area-label';
+  label.innerHTML = '<span class="dot" style="background:' + area.color + '"></span>' + area.name;
+  section.appendChild(label);
+
+  area.shops.forEach((s, i) => {
+    s.area = area.name; s.color = area.color; s.idx = i + 1;
+    allShops.push(s);
+
+    const icon = wanted => L.divIcon({
+      className: '',
+      html: '<div class="pin' + (wanted ? ' wanted' : '') + '" style="background:' + area.color + '">' +
+            '<span>' + (wanted ? I_THUMB(13) : s.idx) + '</span></div>',
+      iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]
+    });
+    const marker = L.marker([s.lat, s.lng], { icon: icon(isWanted(s)) });
+    s._marker = marker; s._icon = icon;
+    marker.addTo(group);
+
+    marker.bindPopup(() =>
+      '<h3>' + s.n + '</h3>' +
+      '<div class="p-addr">' + I_PIN(11) + ' ' + s.a + '</div>' +
+      '<div><span class="label-mini">名物</span>' + s.m + '</div>' +
+      '<div><span class="label-mini">お酒</span>' + s.d + '</div>' +
+      '<div style="margin-top:6px"><a href="' + s.u + '" target="_blank">店舗情報</a>' +
+      '<a href="' + gmapUrl(s) + '" target="_blank">Googleマップ</a></div>' +
+      '<button class="p-want' + (isWanted(s) ? ' on' : '') + '" onclick="toggleWant(\'' +
+      shopId(s).replace(/'/g, "\\'") + '\')">' + I_THUMB(14) + (isWanted(s) ? ' 行きたい！' : ' 行きたい') + '</button>'
+    );
+
+
+    marker.on("popupopen", () => {
+      document.querySelectorAll(".shop.selected").forEach(el => el.classList.remove("selected"));
+      s._card.classList.add("selected");
+      s._card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    const card = document.createElement('div');
+    card.className = 'shop';
+    s._card = card;
+    card.innerHTML =
+      '<div class="top"><span class="num" style="background:' + area.color + '">' + s.idx + '</span>' +
+      '<h3>' + s.n + '</h3></div>' +
+      '<button class="want' + (isWanted(s) ? ' on' : '') + '" title="行きたい">' + I_THUMB(17) + '</button>' +
+      '<div class="addr">' + I_PIN(11) + ' ' + s.a + '</div>' +
+      '<div class="tag-row"><span class="tag food"><span class="label-mini">名物</span>' + s.m + '</span>' +
+      '<span class="tag drink"><span class="label-mini">お酒</span>' + s.d + '</span></div>' +
+      '<div class="links"><a href="' + s.u + '" target="_blank">店舗情報</a>' +
+      '<a href="' + gmapUrl(s) + '" target="_blank">Googleマップ</a></div>';
+    card.querySelector('.want').addEventListener('click', e => {
+      e.stopPropagation();
+      toggleWant(shopId(s));
+    });
+    card.addEventListener('click', e => {
+      if (e.target.tagName === 'A') return;
+      document.querySelectorAll('.shop.selected').forEach(el => el.classList.remove('selected'));
+      card.classList.add('selected');
+      if (document.body.classList.contains('list-mode') && window.innerWidth <= 800) showTab('map');
+      map.flyTo([s.lat, s.lng], 17, { duration:.6 });
+      setTimeout(() => marker.openPopup(), 650);
+    });
+    section.appendChild(card);
+  });
+  listEl.appendChild(section);
+});
+
+map.fitBounds(allShops.map(s => [s.lat, s.lng]), { padding:[40,40] });
+
+function toggleWant(id) {
+  const s = allShops.find(x => shopId(x) === id);
+  if (!s) return;
+  const pos = wants.indexOf(id);
+  if (pos >= 0) wants.splice(pos, 1); else wants.push(id);
+  saveWants();
+  const on = isWanted(s);
+  s._card.querySelector('.want').classList.toggle('on', on);
+  s._marker.setIcon(s._icon(on));
+  if (s._marker.isPopupOpen()) { s._marker.closePopup(); s._marker.openPopup(); }
+  updateSelbar();
+}
+window.toggleWant = toggleWant;
+
+const selbar = document.getElementById('selbar');
+function updateSelbar() {
+  document.getElementById('selCount').textContent = wants.length;
+  selbar.classList.toggle('show', wants.length > 0);
+  document.body.classList.toggle('has-sel', wants.length > 0);
+}
+
+function buildShareText() {
+  const lines = ['【行きたいお店ピックアップ】'];
+  AREAS.forEach(area => {
+    area.shops.filter(isWanted).forEach(s => {
+      lines.push('👍 ' + s.n + '（' + area.name + '）');
+      lines.push('　' + s.a);
+      lines.push('　' + gmapUrl(s));
+    });
+  });
+  if (location.protocol.startsWith('http')) lines.push('', 'マップ：' + location.href);
+  return lines.join('\n');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.getElementById('btnShare').onclick = async () => {
+  const text = buildShareText();
+  if (navigator.share) {
+    try { await navigator.share({ text }); } catch(e) {}
+  } else {
+    await copyText(text);
+    showToast('コピーしました（LINE等に貼り付けてください）');
+  }
+};
+document.getElementById('btnCopy').onclick = async () => {
+  await copyText(buildShareText());
+  showToast('コピーしました');
+};
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch(e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+  }
+}
+
+function toggleArea(name) {
+  activeArea = (activeArea === name) ? null : name;
+  AREAS.forEach(area => {
+    const show = !activeArea || area.name === activeArea;
+    sections[area.name].style.display = show ? '' : 'none';
+    if (show) layerGroups[area.name].addTo(map);
+    else map.removeLayer(layerGroups[area.name]);
+  });
+  document.querySelectorAll('.chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.area === activeArea));
+  const pts = [];
+  AREAS.forEach(a => {
+    if (!activeArea || a.name === activeArea) a.shops.forEach(s => pts.push([s.lat, s.lng]));
+  });
+  map.flyToBounds(pts, { padding:[40,40], duration:.6 });
+}
+
+// mobile tabs
+const tabMap = document.getElementById('tabMap');
+const tabList = document.getElementById('tabList');
+function showTab(which) {
+  document.body.classList.toggle('list-mode', which === 'list');
+  tabMap.classList.toggle('active', which === 'map');
+  tabList.classList.toggle('active', which === 'list');
+  if (which === 'map') setTimeout(() => map.invalidateSize(), 50);
+}
+tabMap.onclick = () => showTab('map');
+tabList.onclick = () => showTab('list');
+
+updateSelbar();
+</script>
+</body>
+</html>
