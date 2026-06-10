@@ -7,161 +7,185 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-  :root {
-    --bg: #f4f5f7;
-    --card: #ffffff;
-    --ink: #1c2333;
-    --sub: #6b7280;
-    --accent: #c9a227;
-    --good: #2e8b6e;
-    --good-bg: #e4f3ed;
-    --radius: 14px;
-    --shadow: 0 2px 10px rgba(20,30,60,.08);
+  :root, html[data-theme="light"] {
+    --bg:#F5F4EF; --card:#FFFEFA; --ink:#29261B; --body:#4a4438; --sub:#94897a;
+    --line:rgba(60,50,40,.10); --accent:#C2562F; --accent-soft:rgba(194,86,47,.10);
+    --chip-bg:#3D3929; --chip-fg:#F5F4EF; --soft:rgba(60,50,40,.08);
+    --header:rgba(250,249,245,.92); --shadow:0 1px 3px rgba(60,50,40,.06);
+    --float:0 4px 16px rgba(60,50,40,.14); --tabact:#3D3929; --tabact-fg:#F5F4EF;
+  }
+  html[data-theme="dark"] {
+    --bg:#262522; --card:#302E2A; --ink:#F0EEE6; --body:#cfc8ba; --sub:#8d8576;
+    --line:rgba(255,250,240,.09); --accent:#D97757; --accent-soft:rgba(217,119,87,.15);
+    --chip-bg:#E8E2D4; --chip-fg:#29261B; --soft:rgba(255,250,240,.10);
+    --header:rgba(31,30,27,.96); --shadow:0 2px 8px rgba(0,0,0,.35);
+    --float:0 4px 18px rgba(0,0,0,.5); --tabact:#D97757; --tabact-fg:#fff;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; }
   body {
-    font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
     display:flex; flex-direction:column; background:var(--bg); color:var(--ink);
   }
   header {
-    background:linear-gradient(120deg,#141b2e 0%,#1f2c4d 60%,#2b3a63 100%);
-    color:#fff; padding:14px 18px 12px;
+    background:var(--header); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line); padding:12px 16px 10px; z-index:1050; position:relative;
   }
-  header h1 { font-size:17px; font-weight:700; letter-spacing:.03em; }
-  header h1 .gold { color:var(--accent); }
-  header .note { font-size:10.5px; color:#9aa3b8; margin-top:3px; }
-  .chips { display:flex; gap:7px; margin-top:10px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
+  .h-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  header h1 {
+    font-size:17px; font-weight:600; letter-spacing:.02em;
+    font-family:"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  }
+  h1 .accent, h1 .gold { color:var(--accent); }
+  #themeBtn {
+    border:none; cursor:pointer; width:32px; height:32px; border-radius:50%;
+    background:var(--soft); color:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  header .note { font-size:10.5px; color:var(--sub); margin-top:4px; }
+  .chips { display:flex; gap:7px; margin-top:9px; overflow-x:auto; padding-bottom:2px; }
   .chips::-webkit-scrollbar { display:none; }
   .chip {
-    border:none; cursor:pointer; font-size:12.5px; font-weight:600; white-space:nowrap;
-    padding:6px 13px; border-radius:999px; color:#fff;
-    background:rgba(255,255,255,.12); transition:all .15s;
-    display:flex; align-items:center; gap:6px; flex:none;
+    border:1px solid var(--line); cursor:pointer; font-size:12px; font-weight:600; white-space:nowrap;
+    padding:6px 13px; border-radius:999px; color:var(--body); background:var(--card);
+    display:flex; align-items:center; gap:6px; flex:none; transition:all .15s;
   }
-  .chip .dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
-  .chip:hover { background:rgba(255,255,255,.22); }
-  .chip.active { background:#fff; color:var(--ink); }
+  .chip .dot { width:8px; height:8px; border-radius:50%; }
+  .chip.active { background:var(--chip-bg); color:var(--chip-fg); border-color:transparent; }
   .container { flex:1; display:flex; min-height:0; position:relative; }
-  #map { flex:1; min-width:0; }
-  aside { width:380px; overflow-y:auto; padding:14px; background:var(--bg); }
+  #map { flex:1; min-width:0; background:var(--bg); }
+  aside { width:390px; overflow-y:auto; padding:14px; background:var(--bg); }
   .area-label {
-    font-size:12px; font-weight:700; color:var(--sub);
-    letter-spacing:.12em; margin:14px 4px 8px;
-    display:flex; align-items:center; gap:7px;
+    font-size:11.5px; font-weight:700; color:var(--sub); letter-spacing:.14em;
+    margin:16px 4px 9px; display:flex; align-items:center; gap:7px;
   }
-  .area-label .dot { width:10px; height:10px; border-radius:50%; }
+  .area-label .dot { width:9px; height:9px; border-radius:50%; }
   .shop {
-    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
-    padding:14px 16px; margin-bottom:10px; cursor:pointer;
-    border:1.5px solid transparent; transition:border-color .15s, box-shadow .15s;
-    position:relative;
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); padding:14px 16px; margin-bottom:11px; cursor:pointer;
+    transition:border-color .15s, box-shadow .15s; position:relative;
   }
-  .shop:hover { box-shadow:0 4px 16px rgba(20,30,60,.14); }
-  .shop.selected { border-color:var(--accent); }
+  .shop.selected { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), var(--shadow); }
   .shop .top { display:flex; align-items:center; gap:10px; padding-right:40px; }
-  .shop .num {
-    flex:none; width:26px; height:26px; border-radius:50%; color:#fff;
-    font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  .num {
+    flex:none; width:26px; height:26px; border-radius:8px; color:#fff;
+    font-size:13.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
+    font-family:"Hiragino Mincho ProN",Georgia,serif; box-shadow:inset 0 -1.5px 0 rgba(0,0,0,.18);
   }
-  .shop h3 { font-size:14.5px; font-weight:700; }
-  .shop .addr { font-size:11.5px; color:var(--sub); margin:6px 0 8px; }
-  .tag-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px; }
-  .tag { font-size:11.5px; padding:3px 9px; border-radius:7px; line-height:1.5; }
-  .tag.food { background:#fdf6e3; color:#8a6d1c; }
-  .tag.drink { background:#eef4fb; color:#2a5d96; }
-  .shop .links { display:flex; gap:8px; }
-  .shop .links a {
-    font-size:12px; font-weight:600; text-decoration:none;
-    color:#2a5d96; background:#f1f4f8; padding:6px 12px; border-radius:8px;
+  .shop h3 { font-size:15px; font-weight:600; letter-spacing:-.01em; }
+  .st-row { display:flex; gap:6px; margin:9px 0 6px; flex-wrap:wrap; }
+  .st {
+    font-size:11.5px; padding:4px 10px; border-radius:999px; font-weight:600;
+    background:var(--chip-bg); color:var(--chip-fg);
   }
-  .shop .links a:active, .shop .links a:hover { background:#e2e9f2; }
-  /* want (thumbs-up) button */
+  .st.sec { background:var(--soft); color:var(--body); font-weight:500; }
+  .lines { font-size:10.5px; color:var(--sub); margin-bottom:7px; }
+  .desc { font-size:12.5px; color:var(--body); line-height:1.65; }
+  .desc b { font-weight:600; color:var(--ink); }
+  .btns { display:flex; gap:7px; margin-top:10px; }
+  .btns a, .btns button {
+    flex:1; text-align:center; border:none; cursor:pointer; text-decoration:none;
+    font-size:12px; font-weight:600; padding:8px 0; border-radius:10px; font-family:inherit;
+  }
+  .b-map { background:var(--accent); color:#fff; }
+  .b-info { background:var(--accent-soft); color:var(--accent); }
+  .b-route { background:var(--soft); color:var(--body); }
   .want {
-    position:absolute; top:12px; right:12px; border:none; cursor:pointer;
-    width:34px; height:34px; border-radius:50%; line-height:1;
-    background:#f1f2f5; color:#b6bcc8; transition:all .15s;
-    display:flex; align-items:center; justify-content:center;
+    position:absolute; top:13px; right:13px; border:none; cursor:pointer;
+    width:32px; height:32px; border-radius:50%; background:var(--soft); color:var(--sub);
+    display:flex; align-items:center; justify-content:center; transition:all .15s;
   }
-  .want.on { background:var(--good-bg); color:var(--good); transform:scale(1.08); }
+  .want.on { background:var(--accent-soft); color:var(--accent); transform:scale(1.08); }
   /* selection bar */
   #selbar {
-    position:fixed; left:50%; transform:translateX(-50%) translateY(120%);
-    bottom:16px; z-index:1100;
-    background:#1c2333; color:#fff; border-radius:999px;
-    box-shadow:0 6px 24px rgba(0,0,0,.3);
-    display:flex; align-items:center; gap:4px; padding:8px 10px 8px 18px;
-    transition:transform .25s ease; max-width:94vw;
+    position:fixed; left:50%; bottom:16px; z-index:1100;
+    transform:translateX(-50%) translateY(140%); visibility:hidden; opacity:0;
+    background:var(--chip-bg); color:var(--chip-fg); border-radius:999px;
+    box-shadow:var(--float); display:flex; align-items:center; gap:4px;
+    padding:8px 10px 8px 18px; transition:all .25s ease; max-width:94vw;
   }
-  #selbar.show { transform:translateX(-50%) translateY(0); }
+  #selbar.show { transform:translateX(-50%) translateY(0); visibility:visible; opacity:1; }
   #selbar .cnt { font-size:13px; font-weight:600; white-space:nowrap; }
-  #selbar .cnt b { color:#8fd9bd; }
+  #selbar .cnt b { color:var(--accent); }
+  html[data-theme="dark"] #selbar .cnt b { color:#C2562F; }
   #selbar button {
-    border:none; cursor:pointer; font-size:12.5px; font-weight:700;
-    padding:8px 14px; border-radius:999px; margin-left:6px; white-space:nowrap;
+    border:none; cursor:pointer; font-size:12.5px; font-weight:700; font-family:inherit;
+    padding:8px 15px; border-radius:999px; margin-left:6px; white-space:nowrap;
   }
-  #selbar .send { background:var(--good); color:#fff; }
-  #selbar .copy { background:rgba(255,255,255,.15); color:#fff; }
-  /* mobile tabs */
+  #selbar .send { background:var(--accent); color:#fff; }
+  #selbar .copy { background:rgba(127,127,127,.25); color:var(--chip-fg); }
   #tabs { display:none; }
-  /* map markers */
+  /* map pins */
   .pin {
     width:30px; height:30px; border-radius:50% 50% 50% 0;
-    transform:rotate(-45deg); border:2.5px solid #fff;
+    transform:rotate(-45deg); border:2px solid #FFFEFA;
     box-shadow:0 2px 6px rgba(0,0,0,.35);
     display:flex; align-items:center; justify-content:center;
   }
-  .pin span { transform:rotate(45deg); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
-  .pin.wanted { border-color:#bfe8d8; }
-  .leaflet-popup-content-wrapper { border-radius:12px; box-shadow:0 4px 18px rgba(20,30,60,.25); }
+  html[data-theme="dark"] .pin { border-color:#E8E2D4; }
+  .pin span {
+    transform:rotate(45deg); color:#fff; font-size:12.5px; font-weight:600;
+    font-family:"Hiragino Mincho ProN",Georgia,serif;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .stpin {
+    background:var(--chip-bg); color:var(--chip-fg); font-size:10.5px; font-weight:700;
+    padding:3px 8px; border-radius:7px; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.3);
+    border:1px solid rgba(127,127,127,.25); letter-spacing:.02em;
+  }
+  .leaflet-popup-content-wrapper { border-radius:14px; background:var(--card); color:var(--ink); box-shadow:var(--float); }
+  .leaflet-popup-tip { background:var(--card); }
   .leaflet-popup-content { font-size:12.5px; line-height:1.6; margin:14px 16px; }
-  .leaflet-popup-content h3 { font-size:14.5px; margin-bottom:4px; color:var(--ink); padding-right:30px; }
-  .leaflet-popup-content .p-addr { color:var(--sub); font-size:11.5px; margin-bottom:6px; }
-  .leaflet-popup-content a { color:#2a5d96; font-weight:600; text-decoration:none; margin-right:12px; }
+  .leaflet-popup-content h3 { font-size:14.5px; margin-bottom:5px; font-weight:600; padding-right:10px; }
+  .leaflet-popup-content .p-st { margin-bottom:5px; }
+  .leaflet-popup-content .p-links { margin-top:7px; display:flex; gap:7px; }
+  .leaflet-popup-content .p-links a {
+    flex:1; text-align:center; font-size:11.5px; font-weight:600; text-decoration:none;
+    padding:6px 0; border-radius:8px; background:var(--accent-soft); color:var(--accent);
+  }
   .leaflet-popup-content .p-want {
     border:none; cursor:pointer; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700;
-    background:#f1f2f5; color:#6b7280; margin-top:6px;
+    background:var(--soft); color:var(--sub); margin-top:7px; font-family:inherit;
     display:inline-flex; align-items:center; gap:5px;
   }
-  .leaflet-popup-content .p-want.on { background:var(--good-bg); color:var(--good); }
-  .label-mini { font-weight:700; margin-right:2px; }
-  .icon { vertical-align:-2px; }
+  .leaflet-popup-content .p-want.on { background:var(--accent-soft); color:var(--accent); }
+  .leaflet-container a.leaflet-popup-close-button { color:var(--sub); }
   .toast {
     position:fixed; left:50%; bottom:84px; transform:translateX(-50%);
-    background:rgba(28,35,51,.95); color:#fff; font-size:13px;
+    background:var(--chip-bg); color:var(--chip-fg); font-size:13px;
     padding:10px 18px; border-radius:10px; z-index:1200; opacity:0;
-    transition:opacity .3s; pointer-events:none; white-space:nowrap;
+    transition:opacity .3s; pointer-events:none; white-space:nowrap; box-shadow:var(--float);
   }
   .toast.show { opacity:1; }
+  .icon { vertical-align:-2px; }
   @media (max-width: 800px) {
     header h1 { font-size:16px; }
     .container { flex-direction:column; }
     #map { height:100%; }
-    aside {
-      display:none; width:100%; height:100%;
-      padding:12px 12px 90px;
-    }
+    aside { display:none; width:100%; height:100%; padding:12px 12px 96px; }
     body.list-mode #map { display:none; }
     body.list-mode aside { display:block; }
     #tabs {
       display:flex; position:fixed; left:50%; transform:translateX(-50%);
-      bottom:16px; z-index:1000; background:#fff; border-radius:999px;
-      box-shadow:0 4px 18px rgba(0,0,0,.22); overflow:hidden;
+      bottom:16px; z-index:1000; background:var(--card); border:1px solid var(--line);
+      border-radius:999px; box-shadow:var(--float); padding:3px;
     }
-    body.has-sel #tabs { bottom:76px; }
+    body.has-sel #tabs { bottom:78px; }
     #tabs button {
-      border:none; cursor:pointer; font-size:13.5px; font-weight:700;
-      padding:11px 26px; background:#fff; color:var(--sub);
+      border:none; cursor:pointer; font-size:12.5px; font-weight:600; font-family:inherit;
+      padding:9px 26px; background:transparent; color:var(--sub); border-radius:999px;
     }
-    #tabs button.active { background:var(--ink); color:#fff; }
+    #tabs button.active { background:var(--tabact); color:var(--tabact-fg); }
     #selbar { bottom:14px; }
   }
 </style>
 </head>
 <body>
 <header>
-  <h1>下町<span class="gold">コスパ居酒屋</span>マップ</h1>
-  <div class="note">上野・浅草・亀戸・錦糸町・押上｜グッドボタンで行きたいお店を選んで送れます｜ピン位置は近似・最新情報はリンク先で（2026年6月作成）</div>
+  <div class="h-row">
+    <h1>下町<span class="accent">コスパ居酒屋</span>マップ</h1>
+    <button id="themeBtn" aria-label="テーマ切替"></button>
+  </div>
+  <div class="note">上野・浅草・亀戸 錦糸町・押上｜グッドボタンで行きたいお店を選んで送れます｜ピン位置・徒歩分数は近似（2026年6月更新）</div>
   <div class="chips" id="chips"></div>
 </header>
 <div class="container">
@@ -191,7 +215,19 @@ const AREAS = [
     "lng": 139.7745,
     "m": "もつ焼き1本90円〜・馬モツ煮込み（昭和25年創業）",
     "d": "名物チューハイ・ホッピー",
-    "u": "https://tabelog.com/tokyo/A1311/A131101/13016740/"
+    "u": "https://tabelog.com/tokyo/A1311/A131101/13016740/",
+    "st": [
+     {
+      "name": "京成上野駅",
+      "min": 2,
+      "line": "京成本線"
+     },
+     {
+      "name": "御徒町駅",
+      "min": 5,
+      "line": "JR山手線・京浜東北線"
+     }
+    ]
    },
    {
     "n": "立飲み たきおか",
@@ -200,7 +236,19 @@ const AREAS = [
     "lng": 139.7749,
     "m": "朝から飲める立ち飲みの聖地・つまみ200円前後",
     "d": "チューハイ・ホッピー",
-    "u": "https://www.google.com/maps/search/立飲みたきおか+上野"
+    "u": "https://www.google.com/maps/search/立飲みたきおか+上野",
+    "st": [
+     {
+      "name": "京成上野駅",
+      "min": 1,
+      "line": "京成本線"
+     },
+     {
+      "name": "上野駅",
+      "min": 6,
+      "line": "JR山手線・京浜東北線ほか／メトロ銀座線・日比谷線"
+     }
+    ]
    },
    {
     "n": "肉の大山 上野店",
@@ -209,7 +257,19 @@ const AREAS = [
     "lng": 139.7757,
     "m": "精肉店直営・やみつきメンチ・特製コロッケ",
     "d": "生ビール・サワー類",
-    "u": "https://www.google.com/maps/search/肉の大山+上野店"
+    "u": "https://www.google.com/maps/search/肉の大山+上野店",
+    "st": [
+     {
+      "name": "京成上野駅",
+      "min": 2,
+      "line": "京成本線"
+     },
+     {
+      "name": "上野駅",
+      "min": 4,
+      "line": "JR山手線・京浜東北線ほか／メトロ銀座線・日比谷線"
+     }
+    ]
    },
    {
     "n": "大衆酒場 カドクラ",
@@ -218,7 +278,19 @@ const AREAS = [
     "lng": 139.7753,
     "m": "ハムカツ・桜肉（馬肉）料理",
     "d": "バイスサワー",
-    "u": "https://www.google.com/maps/search/大衆酒場カドクラ+上野"
+    "u": "https://www.google.com/maps/search/大衆酒場カドクラ+上野",
+    "st": [
+     {
+      "name": "京成上野駅",
+      "min": 1,
+      "line": "京成本線"
+     },
+     {
+      "name": "上野駅",
+      "min": 4,
+      "line": "JR山手線・京浜東北線ほか／メトロ銀座線・日比谷線"
+     }
+    ]
    },
    {
     "n": "魚草",
@@ -227,7 +299,19 @@ const AREAS = [
     "lng": 139.7742,
     "m": "アメ横の海鮮立ち飲み・新鮮な刺身と貝焼き",
     "d": "日本酒の品揃えが豊富",
-    "u": "https://www.google.com/maps/search/魚草+アメ横"
+    "u": "https://www.google.com/maps/search/魚草+アメ横",
+    "st": [
+     {
+      "name": "京成上野駅",
+      "min": 2,
+      "line": "京成本線"
+     },
+     {
+      "name": "御徒町駅",
+      "min": 5,
+      "line": "JR山手線・京浜東北線"
+     }
+    ]
    }
   ]
  },
@@ -242,7 +326,19 @@ const AREAS = [
     "lng": 139.7963,
     "m": "明治13年創業・日本最古のバー（洋食つまみも）",
     "d": "名物「デンキブラン」",
-    "u": "https://tabelog.com/tokyo/A1311/A131102/13003664/"
+    "u": "https://tabelog.com/tokyo/A1311/A131102/13003664/",
+    "st": [
+     {
+      "name": "浅草駅",
+      "min": 1,
+      "line": "メトロ銀座線・都営浅草線・東武スカイツリーライン"
+     },
+     {
+      "name": "浅草駅（TX）",
+      "min": 6,
+      "line": "つくばエクスプレス"
+     }
+    ]
    },
    {
     "n": "正ちゃん",
@@ -251,7 +347,19 @@ const AREAS = [
     "lng": 139.7934,
     "m": "トロトロの牛煮込み550円",
     "d": "ホッピー",
-    "u": "https://tabelog.com/tokyo/A1311/A131102/13010507/"
+    "u": "https://tabelog.com/tokyo/A1311/A131102/13010507/",
+    "st": [
+     {
+      "name": "浅草駅（TX）",
+      "min": 3,
+      "line": "つくばエクスプレス"
+     },
+     {
+      "name": "浅草駅",
+      "min": 8,
+      "line": "メトロ銀座線・都営浅草線・東武スカイツリーライン"
+     }
+    ]
    },
    {
     "n": "鈴芳",
@@ -260,7 +368,19 @@ const AREAS = [
     "lng": 139.793,
     "m": "煮込みと串が定番のホッピー通り名物店",
     "d": "希少な樽生ホッピー（600円）",
-    "u": "https://tabelog.com/tokyo/A1311/A131102/13016820/"
+    "u": "https://tabelog.com/tokyo/A1311/A131102/13016820/",
+    "st": [
+     {
+      "name": "浅草駅（TX）",
+      "min": 3,
+      "line": "つくばエクスプレス"
+     },
+     {
+      "name": "浅草駅",
+      "min": 8,
+      "line": "メトロ銀座線・都営浅草線・東武スカイツリーライン"
+     }
+    ]
    },
    {
     "n": "居酒屋 浩司",
@@ -269,7 +389,19 @@ const AREAS = [
     "lng": 139.7932,
     "m": "店頭の大鍋でグツグツ煮込む牛すじ煮込み",
     "d": "ホッピー・チューハイ",
-    "u": "https://www.google.com/maps/search/居酒屋浩司+浅草"
+    "u": "https://www.google.com/maps/search/居酒屋浩司+浅草",
+    "st": [
+     {
+      "name": "浅草駅（TX）",
+      "min": 2,
+      "line": "つくばエクスプレス"
+     },
+     {
+      "name": "浅草駅",
+      "min": 7,
+      "line": "メトロ銀座線・都営浅草線・東武スカイツリーライン"
+     }
+    ]
    },
    {
     "n": "浅草 もつ焼のんき",
@@ -278,7 +410,19 @@ const AREAS = [
     "lng": 139.79675,
     "m": "秘伝だれの名物「しろたれ」（浅草駅徒歩1分）",
     "d": "元祖焼酎ハイボール「のんきボール」",
-    "u": "https://b953614.gorp.jp/"
+    "u": "https://b953614.gorp.jp/",
+    "st": [
+     {
+      "name": "浅草駅",
+      "min": 2,
+      "line": "メトロ銀座線・都営浅草線・東武スカイツリーライン"
+     },
+     {
+      "name": "浅草駅（TX）",
+      "min": 8,
+      "line": "つくばエクスプレス"
+     }
+    ]
    }
   ]
  },
@@ -293,7 +437,14 @@ const AREAS = [
     "lng": 139.8272,
     "m": "毎朝仕入れの新鮮ホルモン・「トロミノ」必食（行列必至）",
     "d": "レモンサワー・ホッピー",
-    "u": "https://tabelog.com/tokyo/A1312/A131202/13008099/"
+    "u": "https://tabelog.com/tokyo/A1312/A131202/13008099/",
+    "st": [
+     {
+      "name": "亀戸駅",
+      "min": 1,
+      "line": "JR総武線・東武亀戸線"
+     }
+    ]
    },
    {
     "n": "ホルモン青木 亀戸本店",
@@ -302,7 +453,14 @@ const AREAS = [
     "lng": 139.8284,
     "m": "鮮度抜群・大ぶりポーションのホルモン焼き",
     "d": "瓶ビール・サワー",
-    "u": "https://tabelog.com/tokyo/A1312/A131202/13059962/"
+    "u": "https://tabelog.com/tokyo/A1312/A131202/13059962/",
+    "st": [
+     {
+      "name": "亀戸駅",
+      "min": 3,
+      "line": "JR総武線・東武亀戸線"
+     }
+    ]
    },
    {
     "n": "亀戸餃子 本店",
@@ -311,7 +469,14 @@ const AREAS = [
     "lng": 139.8266,
     "m": "メニューは餃子のみ（1皿約300円・2皿目自動提供）",
     "d": "餃子＋ビールの黄金コンビ",
-    "u": "https://www.google.com/maps/search/亀戸餃子+本店"
+    "u": "https://www.google.com/maps/search/亀戸餃子+本店",
+    "st": [
+     {
+      "name": "亀戸駅",
+      "min": 1,
+      "line": "JR総武線・東武亀戸線"
+     }
+    ]
    },
    {
     "n": "三四郎",
@@ -320,7 +485,14 @@ const AREAS = [
     "lng": 139.8147,
     "m": "白木カウンターの老舗酒場・焼きとん・名物「くりから焼き」",
     "d": "酎ハイ・日本酒",
-    "u": "https://tabelog.com/tokyo/A1312/A131201/13029759/"
+    "u": "https://tabelog.com/tokyo/A1312/A131201/13029759/",
+    "st": [
+     {
+      "name": "錦糸町駅",
+      "min": 3,
+      "line": "JR総武線・メトロ半蔵門線"
+     }
+    ]
    },
    {
     "n": "美味千成",
@@ -329,7 +501,14 @@ const AREAS = [
     "lng": 139.8137,
     "m": "昭和創業の駅前大衆酒場・焼きとん・煮込み",
     "d": "19時までホッピーセット300円",
-    "u": "https://1000bero.net/restaurant-2201/"
+    "u": "https://1000bero.net/restaurant-2201/",
+    "st": [
+     {
+      "name": "錦糸町駅",
+      "min": 1,
+      "line": "JR総武線・メトロ半蔵門線"
+     }
+    ]
    }
   ]
  },
@@ -344,7 +523,19 @@ const AREAS = [
     "lng": 139.8108,
     "m": "炭火もつ焼き・味しみのもつ煮（押上駅すぐ）",
     "d": "チューハイ・ホッピー",
-    "u": "https://tabelog.com/tokyo/A1312/A131203/13046230/"
+    "u": "https://tabelog.com/tokyo/A1312/A131203/13046230/",
+    "st": [
+     {
+      "name": "押上駅",
+      "min": 5,
+      "line": "メトロ半蔵門線・都営浅草線・京成押上線・東武"
+     },
+     {
+      "name": "とうきょうスカイツリー駅",
+      "min": 5,
+      "line": "東武スカイツリーライン"
+     }
+    ]
    },
    {
     "n": "やきとり伝次",
@@ -353,7 +544,19 @@ const AREAS = [
     "lng": 139.809,
     "m": "串120円〜・肉刺し盛り・特製もつ煮込み（土日は昼飲みも）",
     "d": "生ビール・サワー",
-    "u": "https://tabelog.com/tokyo/A1312/A131203/13221731/"
+    "u": "https://tabelog.com/tokyo/A1312/A131203/13221731/",
+    "st": [
+     {
+      "name": "とうきょうスカイツリー駅",
+      "min": 1,
+      "line": "東武スカイツリーライン"
+     },
+     {
+      "name": "押上駅",
+      "min": 6,
+      "line": "メトロ半蔵門線・都営浅草線・京成押上線・東武"
+     }
+    ]
    },
    {
     "n": "角吉 とうきょうスカイツリー駅前店",
@@ -362,7 +565,19 @@ const AREAS = [
     "lng": 139.80866,
     "m": "備長炭の大串もつ焼き（シロが名物）・串1本120円〜",
     "d": "ホッピー・チューハイ",
-    "u": "https://kadokichi-skytree.gorp.jp/"
+    "u": "https://kadokichi-skytree.gorp.jp/",
+    "st": [
+     {
+      "name": "とうきょうスカイツリー駅",
+      "min": 1,
+      "line": "東武スカイツリーライン"
+     },
+     {
+      "name": "押上駅",
+      "min": 7,
+      "line": "メトロ半蔵門線・都営浅草線・京成押上線・東武"
+     }
+    ]
    },
    {
     "n": "業平 仁",
@@ -371,7 +586,19 @@ const AREAS = [
     "lng": 139.8122,
     "m": "スカイツリーのお膝元・女将の手料理が評判の隠れ家",
     "d": "日本酒・焼酎の品揃えが豊富",
-    "u": "https://tabelog.com/tokyo/A1312/A131203/13200001/"
+    "u": "https://tabelog.com/tokyo/A1312/A131203/13200001/",
+    "st": [
+     {
+      "name": "押上駅",
+      "min": 5,
+      "line": "メトロ半蔵門線・都営浅草線・京成押上線・東武"
+     },
+     {
+      "name": "とうきょうスカイツリー駅",
+      "min": 7,
+      "line": "東武スカイツリーライン"
+     }
+    ]
    },
    {
     "n": "わくい亭",
@@ -380,42 +607,97 @@ const AREAS = [
     "lng": 139.7998,
     "m": "肉汁あふれるジャンボメンチカツ・タンシチュー（売り切れ御免）",
     "d": "瓶ビール・日本酒",
-    "u": "https://r.gnavi.co.jp/hf231gue0000/"
+    "u": "https://r.gnavi.co.jp/hf231gue0000/",
+    "st": [
+     {
+      "name": "本所吾妻橋駅",
+      "min": 7,
+      "line": "都営浅草線"
+     }
+    ]
    }
   ]
  }
 ];
+const STATIONS = [{"name": "京成上野駅", "lat": 35.7115, "lng": 139.7745}, {"name": "御徒町駅", "lat": 35.7075, "lng": 139.7747}, {"name": "上野駅", "lat": 35.7138, "lng": 139.777}, {"name": "浅草駅", "lat": 35.7112, "lng": 139.7967}, {"name": "浅草駅（TX）", "lat": 35.7129, "lng": 139.7926}, {"name": "亀戸駅", "lat": 35.6973, "lng": 139.8265}, {"name": "錦糸町駅", "lat": 35.6962, "lng": 139.814}, {"name": "押上駅", "lat": 35.7103, "lng": 139.8132}, {"name": "とうきょうスカイツリー駅", "lat": 35.7106, "lng": 139.809}, {"name": "本所吾妻橋駅", "lat": 35.7086, "lng": 139.803}];
 
-const map = L.map('map', { zoomControl:false });
-L.control.zoom({ position:'bottomright' }).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  maxZoom: 20, subdomains: 'abcd',
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-}).addTo(map);
-
-const gmapUrl = s => 'https://www.google.com/maps/search/' + encodeURIComponent(s.n + ' ' + s.a);
-const shopId = s => s.n;
-
-// SVGアイコン（lucide風・currentColorで親要素の色を継承）
+// ---- テーマ ----
+const THEME_KEY = 'izakaya_theme';
 const svgIcon = (paths, size) =>
   '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
   'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="' + size + '" height="' + size + '">' +
   paths + '</svg>';
 const I_THUMB = sz => svgIcon('<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>', sz);
-const I_PIN = sz => svgIcon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>', sz);
-document.getElementById('selThumb').innerHTML = I_THUMB(14);
+const I_MOON = svgIcon('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>', 16);
+const I_SUN = svgIcon('<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>', 16);
 
-// 行きたいリスト（端末に保存）
+let theme;
+try { theme = localStorage.getItem(THEME_KEY); } catch(e) {}
+if (theme !== 'light' && theme !== 'dark') {
+  theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+let tileLayer = null;
+function applyTheme(t) {
+  theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').innerHTML = (t === 'dark') ? I_SUN : I_MOON;
+  try { localStorage.setItem(THEME_KEY, t); } catch(e) {}
+  if (tileLayer) tileLayer.setUrl(tileUrl());
+}
+const tileUrl = () => (theme === 'dark')
+  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+  : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+document.documentElement.setAttribute('data-theme', theme);
+
+// ---- 地図 ----
+const map = L.map('map', { zoomControl:false });
+L.control.zoom({ position:'bottomright' }).addTo(map);
+tileLayer = L.tileLayer(tileUrl(), {
+  maxZoom: 20, subdomains: 'abcd',
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+}).addTo(map);
+
+// 駅マーカー（駅名ラベルを常時表示）
+STATIONS.forEach(s => {
+  L.marker([s.lat, s.lng], {
+    icon: L.divIcon({ className:'', html:'<div class="stpin">' + s.name + '</div>',
+      iconSize:null, iconAnchor:[24, 11] }),
+    interactive:false, zIndexOffset:-100
+  }).addTo(map);
+});
+
+const gmapUrl = s => 'https://www.google.com/maps/search/' + encodeURIComponent(s.n + ' ' + s.a);
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const routeUrl = s => isIOS
+  ? 'https://maps.apple.com/?daddr=' + encodeURIComponent(s.n + ' ' + s.a)
+  : 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(s.n + ' ' + s.a);
+const shopId = s => s.n;
+
 let wants = [];
 try { wants = JSON.parse(localStorage.getItem('izakaya_wants') || '[]'); } catch(e) {}
 const saveWants = () => { try { localStorage.setItem('izakaya_wants', JSON.stringify(wants)); } catch(e) {} };
 const isWanted = s => wants.includes(shopId(s));
+
+const stBadges = (s, cls) => {
+  if (!s.st || !s.st.length) return '';
+  return '<div class="' + (cls || 'st-row') + '">' +
+    s.st.map((x, i) => '<span class="st' + (i ? ' sec' : '') + '">' + x.name + ' 徒歩約' + x.min + '分</span>').join('') +
+    '</div>';
+};
+const stLines = s => {
+  if (!s.st || !s.st.length) return '';
+  const seen = [];
+  s.st.forEach(x => { if (!seen.includes(x.line)) seen.push(x.line); });
+  return '<div class="lines">' + seen.join('｜') + '</div>';
+};
 
 const listEl = document.getElementById('list');
 const chipsEl = document.getElementById('chips');
 const layerGroups = {}, sections = {};
 const allShops = [];
 let activeArea = null;
+
+const TAG1 = '名物', TAG2 = 'お酒';
 
 AREAS.forEach(area => {
   const group = L.layerGroup().addTo(map);
@@ -451,11 +733,10 @@ AREAS.forEach(area => {
 
     marker.bindPopup(() =>
       '<h3>' + s.n + '</h3>' +
-      '<div class="p-addr">' + I_PIN(11) + ' ' + s.a + '</div>' +
-      '<div><span class="label-mini">名物</span>' + s.m + '</div>' +
-      '<div><span class="label-mini">お酒</span>' + s.d + '</div>' +
-      '<div style="margin-top:6px"><a href="' + s.u + '" target="_blank">店舗情報</a>' +
-      '<a href="' + gmapUrl(s) + '" target="_blank">Googleマップ</a></div>' +
+      stBadges(s, 'st-row p-st') +
+      '<div class="desc"><b>' + TAG1 + '</b>：' + s.m + '<br><b>' + TAG2 + '</b>：' + s.d + '</div>' +
+      '<div class="p-links"><a href="' + s.u + '" target="_blank" rel="noopener">店舗情報</a>' +
+      '<a href="' + routeUrl(s) + '" target="_blank" rel="noopener">経路</a></div>' +
       '<button class="p-want' + (isWanted(s) ? ' on' : '') + '" onclick="toggleWant(\'' +
       shopId(s).replace(/'/g, "\\'") + '\')">' + I_THUMB(14) + (isWanted(s) ? ' 行きたい！' : ' 行きたい') + '</button>'
     );
@@ -466,28 +747,30 @@ AREAS.forEach(area => {
     card.innerHTML =
       '<div class="top"><span class="num" style="background:' + area.color + '">' + s.idx + '</span>' +
       '<h3>' + s.n + '</h3></div>' +
-      '<button class="want' + (isWanted(s) ? ' on' : '') + '" title="行きたい">' + I_THUMB(17) + '</button>' +
-      '<div class="addr">' + I_PIN(11) + ' ' + s.a + '</div>' +
-      '<div class="tag-row"><span class="tag food"><span class="label-mini">名物</span>' + s.m + '</span>' +
-      '<span class="tag drink"><span class="label-mini">お酒</span>' + s.d + '</span></div>' +
-      '<div class="links"><a href="' + s.u + '" target="_blank">店舗情報</a>' +
-      '<a href="' + gmapUrl(s) + '" target="_blank">Googleマップ</a></div>';
-    card.querySelector('.want').addEventListener('click', e => {
-      e.stopPropagation();
-      toggleWant(shopId(s));
-    });
-    card.addEventListener('click', e => {
-      if (e.target.tagName === 'A') return;
+      '<button class="want' + (isWanted(s) ? ' on' : '') + '" title="行きたい">' + I_THUMB(16) + '</button>' +
+      stBadges(s) + stLines(s) +
+      '<div class="desc"><b>' + TAG1 + '</b>：' + s.m + '　<b>' + TAG2 + '</b>：' + s.d + '</div>' +
+      '<div class="btns"><button class="b-map">地図で見る</button>' +
+      '<a class="b-info" href="' + s.u + '" target="_blank" rel="noopener">店舗情報</a>' +
+      '<a class="b-route" href="' + routeUrl(s) + '" target="_blank" rel="noopener">経路</a></div>';
+    const flyTo = () => {
       document.querySelectorAll('.shop.selected').forEach(el => el.classList.remove('selected'));
       card.classList.add('selected');
       if (document.body.classList.contains('list-mode') && window.innerWidth <= 800) showTab('map');
       map.flyTo([s.lat, s.lng], 17, { duration:.6 });
       setTimeout(() => marker.openPopup(), 650);
+    };
+    card.querySelector('.want').addEventListener('click', e => { e.stopPropagation(); toggleWant(shopId(s)); });
+    card.querySelector('.b-map').addEventListener('click', e => { e.stopPropagation(); flyTo(); });
+    card.addEventListener('click', e => {
+      if (e.target.closest('a') || e.target.closest('button')) return;
+      flyTo();
     });
-    marker.on("popupopen", () => {
-      document.querySelectorAll(".shop.selected").forEach(el => el.classList.remove("selected"));
-      s._card.classList.add("selected");
-      s._card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    marker.on('popupopen', () => {
+      document.querySelectorAll('.shop.selected').forEach(el => el.classList.remove('selected'));
+      card.classList.add('selected');
+      card.scrollIntoView({ behavior:'smooth', block:'center' });
     });
 
     section.appendChild(card);
@@ -512,6 +795,7 @@ function toggleWant(id) {
 window.toggleWant = toggleWant;
 
 const selbar = document.getElementById('selbar');
+document.getElementById('selThumb').innerHTML = I_THUMB(14);
 function updateSelbar() {
   document.getElementById('selCount').textContent = wants.length;
   selbar.classList.toggle('show', wants.length > 0);
@@ -522,7 +806,8 @@ function buildShareText() {
   const lines = ['【行きたいお店ピックアップ】'];
   AREAS.forEach(area => {
     area.shops.filter(isWanted).forEach(s => {
-      lines.push('👍 ' + s.n + '（' + area.name + '）');
+      const st = (s.st && s.st[0]) ? '（' + s.st[0].name + ' 徒歩約' + s.st[0].min + '分）' : '';
+      lines.push('👍 ' + s.n + st);
       lines.push('　' + s.a);
       lines.push('　' + gmapUrl(s));
     });
@@ -537,19 +822,13 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
-
 document.getElementById('btnShare').onclick = async () => {
   const text = buildShareText();
-  if (navigator.share) {
-    try { await navigator.share({ text }); } catch(e) {}
-  } else {
-    await copyText(text);
-    showToast('コピーしました（LINE等に貼り付けてください）');
-  }
+  if (navigator.share) { try { await navigator.share({ text }); } catch(e) {} }
+  else { await copyText(text); showToast('コピーしました（LINE等に貼り付けてください）'); }
 };
 document.getElementById('btnCopy').onclick = async () => {
-  await copyText(buildShareText());
-  showToast('コピーしました');
+  await copyText(buildShareText()); showToast('コピーしました');
 };
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); }
@@ -577,7 +856,6 @@ function toggleArea(name) {
   map.flyToBounds(pts, { padding:[40,40], duration:.6 });
 }
 
-// mobile tabs
 const tabMap = document.getElementById('tabMap');
 const tabList = document.getElementById('tabList');
 function showTab(which) {
@@ -589,6 +867,8 @@ function showTab(which) {
 tabMap.onclick = () => showTab('map');
 tabList.onclick = () => showTab('list');
 
+document.getElementById('themeBtn').onclick = () => applyTheme(theme === 'dark' ? 'light' : 'dark');
+applyTheme(theme);
 updateSelbar();
 </script>
 </body>
