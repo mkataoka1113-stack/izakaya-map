@@ -163,7 +163,7 @@
   }
   .toast.show { opacity:1; }
   .icon { vertical-align:-2px; }
-  html[data-theme="dark"] .leaflet-tile-pane { filter:brightness(.78) contrast(1.04) saturate(.85); }
+  html[data-theme="dark"] .leaflet-tile-pane { filter:brightness(.9) saturate(.92); }
   @media (max-width: 800px) {
     header h1 { font-size:16px; }
     .container { flex-direction:column; }
@@ -840,7 +840,7 @@ STATIONS.forEach(s => {
 const gmapUrl = s => 'https://www.google.com/maps/search/' + encodeURIComponent(s.n + ' ' + s.a);
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const routeUrl = s => isIOS
-  ? 'https://maps.apple.com/?daddr=' + encodeURIComponent(s.n + ' ' + s.a)
+  ? 'maps://?daddr=' + encodeURIComponent(s.n + ' ' + s.a)
   : 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(s.n + ' ' + s.a);
 const shopId = s => s.n;
 
