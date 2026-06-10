@@ -8,18 +8,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root, html[data-theme="light"] {
-    --bg:#F5F4EF; --card:#FFFEFA; --ink:#29261B; --body:#4a4438; --sub:#94897a;
-    --line:rgba(60,50,40,.10); --accent:#C2562F; --accent-soft:rgba(194,86,47,.10);
-    --chip-bg:#3D3929; --chip-fg:#F5F4EF; --soft:rgba(60,50,40,.08);
-    --header:rgba(250,249,245,.92); --shadow:0 1px 3px rgba(60,50,40,.06);
-    --float:0 4px 16px rgba(60,50,40,.14); --tabact:#3D3929; --tabact-fg:#F5F4EF;
+    --bg:#faf9f5; --card:#ffffff; --ink:#141413; --body:#3f3e3a; --sub:#8a887d;
+    --line:#e8e6dc; --accent:#d97757; --accent-soft:rgba(217,119,87,.12);
+    --on-accent:#faf9f5;
+    --chip-bg:#141413; --chip-fg:#faf9f5; --soft:#eeece2;
+    --header:rgba(250,249,245,.92); --shadow:0 1px 3px rgba(20,20,19,.07);
+    --float:0 4px 16px rgba(20,20,19,.16); --tabact:#141413; --tabact-fg:#faf9f5;
   }
   html[data-theme="dark"] {
-    --bg:#262522; --card:#302E2A; --ink:#F0EEE6; --body:#cfc8ba; --sub:#8d8576;
-    --line:rgba(255,250,240,.09); --accent:#D97757; --accent-soft:rgba(217,119,87,.15);
-    --chip-bg:#E8E2D4; --chip-fg:#29261B; --soft:rgba(255,250,240,.10);
-    --header:rgba(31,30,27,.96); --shadow:0 2px 8px rgba(0,0,0,.35);
-    --float:0 4px 18px rgba(0,0,0,.5); --tabact:#D97757; --tabact-fg:#fff;
+    --bg:#141413; --card:#232220; --ink:#faf9f5; --body:#d5d2c8; --sub:#b0aea5;
+    --line:rgba(250,249,245,.12); --accent:#d97757; --accent-soft:rgba(217,119,87,.17);
+    --on-accent:#faf9f5;
+    --chip-bg:#e8e6dc; --chip-fg:#141413; --soft:rgba(250,249,245,.10);
+    --header:rgba(20,20,19,.95); --shadow:0 2px 8px rgba(0,0,0,.4);
+    --float:0 4px 18px rgba(0,0,0,.55); --tabact:#d97757; --tabact-fg:#faf9f5;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; }
@@ -32,10 +34,7 @@
     border-bottom:1px solid var(--line); padding:12px 16px 10px; z-index:1050; position:relative;
   }
   .h-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-  header h1 {
-    font-size:17px; font-weight:600; letter-spacing:.02em;
-    font-family:"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
-  }
+  header h1 { font-size:17px; font-weight:700; letter-spacing:.01em; }
   h1 .accent, h1 .gold { color:var(--accent); }
   #themeBtn {
     border:none; cursor:pointer; width:32px; height:32px; border-radius:50%;
@@ -67,9 +66,14 @@
   .shop.selected { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), var(--shadow); }
   .shop .top { display:flex; align-items:center; gap:10px; padding-right:40px; }
   .num {
-    flex:none; width:26px; height:26px; border-radius:8px; color:#fff;
-    font-size:13.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
-    font-family:"Hiragino Mincho ProN",Georgia,serif; box-shadow:inset 0 -1.5px 0 rgba(0,0,0,.18);
+    flex:none; width:24px; height:24px; border-radius:50% 50% 50% 0;
+    transform:rotate(-45deg); border:1.5px solid var(--card);
+    box-shadow:0 1px 3px rgba(0,0,0,.3); color:#fff;
+    display:flex; align-items:center; justify-content:center; margin:2px 2px 0 0;
+  }
+  .num i {
+    transform:rotate(45deg); font-style:normal; font-size:12.5px; font-weight:600;
+    font-family:"Hiragino Mincho ProN",Georgia,serif;
   }
   .shop h3 { font-size:15px; font-weight:600; letter-spacing:-.01em; }
   .st-row { display:flex; gap:6px; margin:9px 0 6px; flex-wrap:wrap; }
@@ -86,7 +90,7 @@
     flex:1; text-align:center; border:none; cursor:pointer; text-decoration:none;
     font-size:12px; font-weight:600; padding:8px 0; border-radius:10px; font-family:inherit;
   }
-  .b-map { background:var(--accent); color:#fff; }
+  .b-map { background:var(--accent); color:var(--on-accent); }
   .b-info { background:var(--accent-soft); color:var(--accent); }
   .b-route { background:var(--soft); color:var(--body); }
   .want {
@@ -106,12 +110,11 @@
   #selbar.show { transform:translateX(-50%) translateY(0); visibility:visible; opacity:1; }
   #selbar .cnt { font-size:13px; font-weight:600; white-space:nowrap; }
   #selbar .cnt b { color:var(--accent); }
-  html[data-theme="dark"] #selbar .cnt b { color:#C2562F; }
   #selbar button {
     border:none; cursor:pointer; font-size:12.5px; font-weight:700; font-family:inherit;
     padding:8px 15px; border-radius:999px; margin-left:6px; white-space:nowrap;
   }
-  #selbar .send { background:var(--accent); color:#fff; }
+  #selbar .send { background:var(--accent); color:var(--on-accent); }
   #selbar .copy { background:rgba(127,127,127,.25); color:var(--chip-fg); }
   #tabs { display:none; }
   /* map pins */
@@ -148,7 +151,10 @@
     display:inline-flex; align-items:center; gap:5px;
   }
   .leaflet-popup-content .p-want.on { background:var(--accent-soft); color:var(--accent); }
-  .leaflet-container a.leaflet-popup-close-button { color:var(--sub); }
+  .leaflet-container a.leaflet-popup-close-button {
+    color:var(--sub); font-size:24px; width:36px; height:36px;
+    display:flex; align-items:center; justify-content:center; top:2px; right:2px;
+  }
   .toast {
     position:fixed; left:50%; bottom:84px; transform:translateX(-50%);
     background:var(--chip-bg); color:var(--chip-fg); font-size:13px;
@@ -157,6 +163,7 @@
   }
   .toast.show { opacity:1; }
   .icon { vertical-align:-2px; }
+  html[data-theme="dark"] .leaflet-tile-pane { filter:brightness(.78) contrast(1.04) saturate(.85); }
   @media (max-width: 800px) {
     header h1 { font-size:16px; }
     .container { flex-direction:column; }
@@ -644,9 +651,7 @@ function applyTheme(t) {
   try { localStorage.setItem(THEME_KEY, t); } catch(e) {}
   if (tileLayer) tileLayer.setUrl(tileUrl());
 }
-const tileUrl = () => (theme === 'dark')
-  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-  : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const tileUrl = () => 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 document.documentElement.setAttribute('data-theme', theme);
 
 // ---- 地図 ----
@@ -745,7 +750,7 @@ AREAS.forEach(area => {
     card.className = 'shop';
     s._card = card;
     card.innerHTML =
-      '<div class="top"><span class="num" style="background:' + area.color + '">' + s.idx + '</span>' +
+      '<div class="top"><span class="num" style="background:' + area.color + '"><i>' + s.idx + '</i></span>' +
       '<h3>' + s.n + '</h3></div>' +
       '<button class="want' + (isWanted(s) ? ' on' : '') + '" title="行きたい">' + I_THUMB(16) + '</button>' +
       stBadges(s) + stLines(s) +
