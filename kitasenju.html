@@ -379,7 +379,7 @@ AREAS.forEach(area => {
     marker.on("popupopen", () => {
       document.querySelectorAll(".shop.selected").forEach(el => el.classList.remove("selected"));
       s._card.classList.add("selected");
-      s._card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      s._card.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
     section.appendChild(card);
