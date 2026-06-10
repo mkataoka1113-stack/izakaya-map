@@ -163,7 +163,7 @@
   }
   .toast.show { opacity:1; }
   .icon { vertical-align:-2px; }
-  html[data-theme="dark"] .leaflet-tile-pane { filter:brightness(.9) saturate(.92); }
+  html[data-theme="dark"] .leaflet-tile-pane { filter:brightness(1.55) contrast(.92) saturate(1.05); }
   @media (max-width: 800px) {
     header h1 { font-size:16px; }
     .container { flex-direction:column; }
@@ -651,7 +651,9 @@ function applyTheme(t) {
   try { localStorage.setItem(THEME_KEY, t); } catch(e) {}
   if (tileLayer) tileLayer.setUrl(tileUrl());
 }
-const tileUrl = () => 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const tileUrl = () => (theme === 'dark')
+  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+  : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 document.documentElement.setAttribute('data-theme', theme);
 
 // ---- 地図 ----
