@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23faf9f5'/%3E%3Cpath d='M32 9c-10.5 0-19 8.5-19 19 0 13.5 19 28 19 28s19-14.5 19-28c0-10.5-8.5-19-19-19z' fill='%23d97757'/%3E%3Ccircle cx='32' cy='27' r='7' fill='%23faf9f5'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon.png">
 <title>全店舗マップ｜マイ居酒屋コレクション</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1039,6 +1041,27 @@ function showTab(which) {
 }
 tabMap.onclick = () => showTab('map');
 tabList.onclick = () => showTab('list');
+
+// スマホ：ダブルタップでズームイン（タップ位置中心）
+(function() {
+  const mc = map.getContainer();
+  let lastTap = 0, lastPt = null;
+  mc.addEventListener('touchend', e => {
+    if (e.changedTouches.length !== 1 || e.touches.length > 0) return;
+    const t = e.changedTouches[0];
+    const now = Date.now();
+    if (now - lastTap < 350 && lastPt &&
+        Math.hypot(t.clientX - lastPt[0], t.clientY - lastPt[1]) < 40) {
+      e.preventDefault();
+      const rect = mc.getBoundingClientRect();
+      const pt = L.point(t.clientX - rect.left, t.clientY - rect.top);
+      map.setZoomAround(map.containerPointToLatLng(pt), map.getZoom() + 1);
+      lastTap = 0; lastPt = null;
+    } else {
+      lastTap = now; lastPt = [t.clientX, t.clientY];
+    }
+  }, { passive: false });
+})();
 
 document.getElementById('themeBtn').onclick = () => applyTheme(theme === 'dark' ? 'light' : 'dark');
 applyTheme(theme);
