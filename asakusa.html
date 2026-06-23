@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23faf9f5'/%3E%3Cpath d='M32 9c-10.5 0-19 8.5-19 19 0 13.5 19 28 19 28s19-14.5 19-28c0-10.5-8.5-19-19-19z' fill='%23d97757'/%3E%3Ccircle cx='32' cy='27' r='7' fill='%23faf9f5'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icon.png">
-<title>グルメマップ｜戸越</title>
+<title>グルメマップ｜浅草</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
@@ -191,10 +191,10 @@
 <body>
 <header>
   <div class="h-row">
-    <h1>戸越<span class="accent">グルメ</span>マップ</h1>
+    <h1>浅草<span class="accent">グルメ</span>マップ</h1>
     <button id="themeBtn" aria-label="テーマ切替"></button>
   </div>
-  <div class="note">戸越・戸越銀座周辺｜グッドボタンで行きたいお店を選んで送れます｜ピン位置は近似・最新情報はリンク先で（2026年6月作成）</div>
+  <div class="note">浅草・雷門周辺｜グッドボタンで行きたいお店を選んで送れます｜ピン位置は近似・最新情報はリンク先で（2026年6月作成）</div>
   <div class="chips" id="chips"></div>
 </header>
 <div class="container">
@@ -214,208 +214,58 @@
 <script>
 const AREAS = [
  {
-  "name": "戸越・戸越銀座駅周辺",
-  "color": "#9163c2",
+  "name": "浅草",
+  "color": "#5b9a4a",
   "shops": [
    {
-    "n": "イタリアンとフレンチのカゼ",
-    "a": "東京都品川区戸越3-2-3",
-    "lat": 35.6108,
-    "lng": 139.7172,
-    "m": "本格パスタ・フレンチ小皿料理",
-    "d": "イタリアン・フレンチ",
-    "u": "https://iatafurekaze.com/",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 2,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 5,
-      "line": "都営浅草線"
-     }
-    ]
+    "n": "神谷バー",
+    "a": "台東区浅草1-1-1",
+    "lat": 35.711,
+    "lng": 139.7963,
+    "m": "明治13年創業・日本最古のバー（洋食つまみも）",
+    "d": "名物「デンキブラン」",
+    "u": "https://tabelog.com/tokyo/A1311/A131102/13003664/"
    },
    {
-    "n": "洋食工房 陶花",
-    "a": "東京都品川区平塚2-18-3",
-    "lat": 35.6115,
-    "lng": 139.7155,
-    "m": "デミグラスオムライス・フォアグラコロッケ",
-    "d": "洋食",
-    "u": "https://touka-togoshi.jp/",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 4,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 6,
-      "line": "都営浅草線"
-     }
-    ]
+    "n": "正ちゃん",
+    "a": "台東区浅草2-7-13（ホッピー通り）",
+    "lat": 35.7146,
+    "lng": 139.7934,
+    "m": "トロトロの牛煮込み550円",
+    "d": "ホッピー",
+    "u": "https://tabelog.com/tokyo/A1311/A131102/13010507/"
    },
    {
-    "n": "Formaggio!! フォルマッジョ",
-    "a": "東京都品川区平塚2-18-3 ファミール串田2F",
-    "lat": 35.6118,
-    "lng": 139.7153,
-    "m": "ラクレットチーズ・シカゴピザ",
-    "d": "イタリアン",
-    "u": "https://www.hotpepper.jp/strJ001203418/",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 3,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 7,
-      "line": "都営浅草線"
-     }
-    ]
+    "n": "鈴芳",
+    "a": "台東区浅草2丁目（ホッピー通り）",
+    "lat": 35.7144,
+    "lng": 139.793,
+    "m": "煮込みと串が定番のホッピー通り名物店",
+    "d": "希少な樽生ホッピー（600円）",
+    "u": "https://tabelog.com/tokyo/A1311/A131102/13016820/"
    },
    {
-    "n": "SPERANZA スペランツァ",
-    "a": "東京都品川区平塚2-16-13",
-    "lat": 35.6122,
-    "lng": 139.715,
-    "m": "6種類のミートソースパスタ",
-    "d": "イタリアン",
-    "u": "https://retty.me/area/PRE13/ARE13/SUB1304/100000047174/",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 5,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 8,
-      "line": "都営浅草線"
-     }
-    ]
+    "n": "居酒屋 浩司",
+    "a": "台東区浅草2丁目（ホッピー通り）",
+    "lat": 35.7141,
+    "lng": 139.7932,
+    "m": "店頭の大鍋でグツグツ煮込む牛すじ煮込み",
+    "d": "ホッピー・チューハイ",
+    "u": "https://www.google.com/maps/search/居酒屋浩司+浅草"
    },
    {
-    "n": "ag（エグ）",
-    "a": "東京都品川区小山2-17-3（武蔵小山・清水湯近く）",
-    "lat": 35.6204,
-    "lng": 139.7082,
-    "m": "古民家イノベーティブフレンチコース",
-    "d": "フレンチ・イノベーティブ",
-    "u": "https://tabelog.com/tokyo/A1317/A131710/13294046/",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 12,
-      "line": "東急池上線"
-     }
-    ]
-   },
-   {
-    "n": "戸越銀座 鮨ばんど",
-    "a": "東京都品川区西五反田6-22-11 1F",
-    "lat": 35.6165,
-    "lng": 139.7175,
-    "m": "すし匠系・珠玉の江戸前寿司",
-    "d": "寿司",
-    "u": "https://www.instagram.com/sushi_8nd/",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 7,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 5,
-      "line": "都営浅草線"
-     }
-    ]
-   },
-   {
-    "n": "Via Rio ヴィアリオ",
-    "a": "東京都品川区戸越（戸越銀座商店街内・詳細はリンク先参照）",
-    "lat": 35.6095,
-    "lng": 139.7185,
-    "m": "旬の食材を使った本格イタリアン",
-    "d": "イタリアン・ワイン",
-    "u": "https://www.google.com/maps/search/Via+Rio+戸越銀座",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 2,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 4,
-      "line": "都営浅草線"
-     }
-    ]
-   },
-   {
-    "n": "らふ 五反田 おばんざい",
-    "a": "東京都品川区西五反田1-30-6",
-    "lat": 35.6246,
-    "lng": 139.7223,
-    "m": "京風おばんざい・季節の小鉢",
-    "d": "和食・おばんざい",
-    "u": "https://www.google.com/maps/search/らふ+五反田+おばんざい",
-    "st": [
-     {
-      "name": "戸越駅",
-      "min": 13,
-      "line": "都営浅草線"
-     }
-    ]
-   },
-   {
-    "n": "La Maison Saitou",
-    "a": "東京都品川区平塚1-6-5",
-    "lat": 35.6164,
-    "lng": 139.7163,
-    "m": "元プリンスホテル料理長の7皿本格フレンチ",
-    "d": "フレンチ",
-    "u": "https://www.google.com/maps/search/La+Maison+Saitou+戸越",
-    "st": [
-     {
-      "name": "戸越銀座駅",
-      "min": 5,
-      "line": "東急池上線"
-     },
-     {
-      "name": "戸越駅",
-      "min": 4,
-      "line": "都営浅草線"
-     }
-    ]
-   },
-   {
-    "n": "居酒屋 おばんざい屋 ことこと",
-    "a": "東京都品川区西五反田7-12-4",
-    "lat": 35.6227,
-    "lng": 139.7198,
-    "m": "やさしい味の隠れ家おばんざい",
-    "d": "和食・おばんざい",
-    "u": "https://www.google.com/maps/search/おばんざい屋+ことこと+戸越",
-    "st": [
-     {
-      "name": "戸越駅",
-      "min": 10,
-      "line": "都営浅草線"
-     }
-    ]
+    "n": "浅草 もつ焼のんき",
+    "a": "台東区雷門2-18-15 丸屋ビル1F",
+    "lat": 35.71036,
+    "lng": 139.79675,
+    "m": "秘伝だれの名物「しろたれ」（浅草駅徒歩1分）",
+    "d": "元祖焼酎ハイボール「のんきボール」",
+    "u": "https://b953614.gorp.jp/"
    }
   ]
  }
 ];
-const STATIONS = [{"name": "戸越銀座駅", "lat": 35.6135, "lng": 139.7152}, {"name": "戸越駅", "lat": 35.6114, "lng": 139.7183}];
+const STATIONS = [{"name": "浅草駅", "lat": 35.7116, "lng": 139.7983}];
 
 // ---- テーマ ----
 const THEME_KEY = 'izakaya_theme';

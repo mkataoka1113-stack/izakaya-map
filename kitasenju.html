@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23faf9f5'/%3E%3Cpath d='M32 9c-10.5 0-19 8.5-19 19 0 13.5 19 28 19 28s19-14.5 19-28c0-10.5-8.5-19-19-19z' fill='%23d97757'/%3E%3Ccircle cx='32' cy='27' r='7' fill='%23faf9f5'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icon.png">
-<title>コスパ居酒屋マップ｜北千住</title>
+<title>グルメマップ｜北千住</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
@@ -191,10 +191,10 @@
 <body>
 <header>
   <div class="h-row">
-    <h1>北千住<span class="accent">コスパ居酒屋</span>マップ</h1>
+    <h1>北千住<span class="accent">グルメ</span>マップ</h1>
     <button id="themeBtn" aria-label="テーマ切替"></button>
   </div>
-  <div class="note">北千住｜グッドボタンで行きたいお店を選んで送れます｜ピン位置・徒歩分数は近似（2026年6月更新）</div>
+  <div class="note">北千住周辺｜グッドボタンで行きたいお店を選んで送れます｜ピン位置は近似・最新情報はリンク先で（2026年6月作成）</div>
   <div class="chips" id="chips"></div>
 </header>
 <div class="container">
@@ -224,14 +224,7 @@ const AREAS = [
     "lng": 139.8012,
     "m": "創業40年超・大串もつ焼き・白みそもつ煮込み（駅徒歩1分）",
     "d": "ホッピー・生ビール",
-    "u": "https://tabelog.com/tokyo/A1324/A132402/13023004/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 6,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13023004/"
    },
    {
     "n": "大衆酒蔵 幸楽",
@@ -240,14 +233,7 @@ const AREAS = [
     "lng": 139.801,
     "m": "1968年創業の老舗・名物「幸楽ボール」・穴子天ぷら",
     "d": "幸楽ボール・チューハイ",
-    "u": "https://tabelog.com/tokyo/A1324/A132402/13025702/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 6,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13025702/"
    },
    {
     "n": "天七 本店",
@@ -256,14 +242,7 @@ const AREAS = [
     "lng": 139.8015,
     "m": "北千住名物の串揚げ老舗・1本100円台・昼飲みOK",
     "d": "瓶ビール・ハイボール",
-    "u": "https://tabelog.com/tokyo/A1324/A132402/13008732/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 5,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13008732/"
    },
    {
     "n": "ざわさん",
@@ -272,14 +251,7 @@ const AREAS = [
     "lng": 139.8,
     "m": "割烹系立ち飲み・日替わり刺身・上質な一品料理（禁煙）",
     "d": "日本酒・レモンサワー",
-    "u": "https://tabelog.com/tokyo/A1324/A132402/13182860/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 7,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13182860/"
    },
    {
     "n": "藤や",
@@ -288,14 +260,7 @@ const AREAS = [
     "lng": 139.8006,
     "m": "40年以上注ぎ足し八丁味噌スープの串煮込み・串120円",
     "d": "日本酒・チューハイ",
-    "u": "https://san-tatsu.jp/spots/39236/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 7,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://san-tatsu.jp/spots/39236/"
    },
    {
     "n": "もつ焼き やまぴー",
@@ -304,14 +269,7 @@ const AREAS = [
     "lng": 139.8033,
     "m": "加賀屋修業・串が折れそうな大ポーション・レバーやスタミナ串",
     "d": "生ビール・レモンサワー",
-    "u": "https://san-tatsu.jp/spots/155430/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 3,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://san-tatsu.jp/spots/155430/"
    },
    {
     "n": "酒呑倶楽部アタル",
@@ -320,14 +278,7 @@ const AREAS = [
     "lng": 139.8002,
     "m": "名物蒸しつくね5種・飲み横ガラス張りの人気店",
     "d": "菊姫など名酒の日本酒・サワー",
-    "u": "https://san-tatsu.jp/spots/155424/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 7,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://san-tatsu.jp/spots/155424/"
    },
    {
     "n": "ささや 北千住",
@@ -336,14 +287,7 @@ const AREAS = [
     "lng": 139.8017,
     "m": "信州味噌の串煮込み・煮込んで炭火で焼く串焼き・駅すぐ",
     "d": "日本酒・サワー",
-    "u": "https://san-tatsu.jp/spots/39249/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 5,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://san-tatsu.jp/spots/39249/"
    },
    {
     "n": "びあマ",
@@ -352,14 +296,7 @@ const AREAS = [
     "lng": 139.8016,
     "m": "1000種40カ国以上クラフトビール・角打ちスタイル",
     "d": "世界のクラフトビール",
-    "u": "https://san-tatsu.jp/spots/155434/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 5,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://san-tatsu.jp/spots/155434/"
    },
    {
     "n": "もつ焼き まんまる",
@@ -368,14 +305,7 @@ const AREAS = [
     "lng": 139.8015,
     "m": "コスパ最高・串1本120円〜・もつ煮込みも絶品（西口徒歩5分）",
     "d": "ホッピー・チューハイ",
-    "u": "https://tabelog.com/tokyo/A1324/A132402/13131156/",
-    "st": [
-     {
-      "name": "北千住駅",
-      "min": 7,
-      "line": "JR常磐線・メトロ千代田線/日比谷線・東武・TX"
-     }
-    ]
+    "u": "https://tabelog.com/tokyo/A1324/A132402/13131156/"
    }
   ]
  }

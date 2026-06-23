@@ -54,6 +54,7 @@
   .open { background:var(--accent); color:var(--on-accent); }
   .copy { background:var(--soft); color:var(--body); }
   .empty { text-align:center; color:var(--sub); font-size:13px; padding:40px 0; }
+  .desc { font-size:12px; color:var(--sub); margin-top:3px; line-height:1.5; }
   .toast {
     position:fixed; left:50%; bottom:30px; transform:translateX(-50%);
     background:var(--chip-bg); color:var(--chip-fg); font-size:13px;
@@ -75,41 +76,64 @@
 <script>
 const MAPS = [
  {
-  "file": "ueno-asakusa-kameido-kinshicho-oshiage.html",
-  "title": "上野・浅草・亀戸 錦糸町・押上・戸越",
-  "genre": "居酒屋・バル",
+  "file": "togoshi.html",
+  "title": "戸越",
+  "genre": "グルメ",
+  "description": "おしゃれなご飯屋さんを中心にリストアップ",
   "areas": [
-   "上野",
-   "浅草",
-   "亀戸・錦糸町",
-   "押上",
    "戸越"
   ],
-  "count": 37,
+  "count": 10,
   "created": "2026-06-10",
   "updated": "2026-06-23"
  },
  {
   "file": "kitasenju.html",
   "title": "北千住",
-  "genre": "居酒屋",
+  "genre": "グルメ",
+  "description": "コスパの良い居酒屋を中心にリストアップ",
   "areas": [
    "北千住"
   ],
   "count": 10,
   "created": "2026-06-10",
-  "updated": "2026-06-10"
+  "updated": "2026-06-23"
  },
  {
-  "file": "togoshi.html",
-  "title": "戸越",
-  "genre": "おしゃれご飯",
+  "file": "ueno.html",
+  "title": "上野",
+  "genre": "グルメ",
+  "description": "コスパの良い居酒屋を中心にリストアップ",
   "areas": [
-   "戸越"
+   "上野"
   ],
-  "count": 10,
+  "count": 5,
   "created": "2026-06-10",
-  "updated": "2026-06-10"
+  "updated": "2026-06-23"
+ },
+ {
+  "file": "asakusa.html",
+  "title": "浅草",
+  "genre": "グルメ",
+  "description": "コスパの良い居酒屋を中心にリストアップ",
+  "areas": [
+   "浅草"
+  ],
+  "count": 5,
+  "created": "2026-06-10",
+  "updated": "2026-06-23"
+ },
+ {
+  "file": "kameido-kinshicho.html",
+  "title": "亀戸・錦糸町",
+  "genre": "グルメ",
+  "description": "おしゃれ系3店＋コスパ居酒屋3店ずつリストアップ（亀戸・錦糸町 各6店）",
+  "areas": [
+   "亀戸・錦糸町"
+  ],
+  "count": 12,
+  "created": "2026-06-23",
+  "updated": "2026-06-23"
  }
 ];
 const listEl = document.getElementById('list');
@@ -124,6 +148,7 @@ MAPS.slice().reverse().forEach(m => {
     '<div class="chips"><span class="chip">' + m.genre + '</span>' +
     '<span class="chip count">' + m.count + '店</span></div>' +
     '<h2>' + m.title + '</h2>' +
+    (m.description ? '<div class="desc">' + m.description + '</div>' : '') +
     '<div class="meta">' + m.created + ' 作成' + (m.updated && m.updated !== m.created ? '・' + m.updated + ' 更新' : '') + '</div>' +
     '<div class="btns"><a class="open" href="' + m.file + '">マップを開く</a>' +
     '<button class="copy">URLをコピー</button></div>';
